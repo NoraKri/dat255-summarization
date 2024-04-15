@@ -16,4 +16,4 @@ about:
 
 ---
 
-About this blog
+An exploration of different summarization techniques. Done as a course project for DAT255 Deep Learning.
