@@ -1,5 +1,19 @@
 [
   {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Exploration of summarization techniques using machine learning",
+    "section": "",
+    "text": "Presentation\n\n\n\n\n\n\ncode\n\n\nanalysis\n\n\nllm\n\n\n\n\n\n\n\n\n\nApr 15, 2024\n\n\nNora Kristiansen, Torjørn Vatnelid\n\n\n\n\n\n\n\n\n\n\n\n\nMap Reduction\n\n\n\n\n\n\ncode\n\n\nanalysis\n\n\nllm\n\n\n\n\n\n\n\n\n\nFeb 15, 2024\n\n\nNora Kristiansen, Torjørn Vatnelid\n\n\n\n\n\n\nNo matching items"
+  },
+  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
@@ -40,5 +54,26 @@
     "title": "Exploration of summarization techniques using machine learning",
     "section": "",
     "text": "Clustering\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSummarization techniques using Large Language Models\n\n\n\n\n\n\nllm\n\n\n\n\n\n\n\n\n\nApr 16, 2024\n\n\nNora Kristiansen og Torbjørn Vatnelid\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/map-reduction/map-reduction.html",
+    "href": "posts/map-reduction/map-reduction.html",
+    "title": "Map Reduction",
+    "section": "",
+    "text": "A good way to work around token limitations. If you are summarizing text that is too long for your chosen model’s context window, Map Reduction can be used.\nMap Reduction works like this: - The text is broken up into manageable pieces (chunks) - A summary is generated for each chunk - A final summary is generated from all the chunk summaries\nThis method is well suited for generating summaries of some types of text, but has some limitations: - The model may over or underemphazise certain aspects of the text - Gets really expensive really fast, as you need many calls to the LLM and lots of input tokens.\n\nfrom dotenv import load_dotenv\nfrom utils import read_files, split_document_by_tokens\nfrom pathlib import Path\n\nimport os\n\nload_dotenv()\nOPENAI_API_KEY = os.getenv('OPENAI_API_KEY')\ndocuments = read_files(Path('../../content/books'))\n\n\nsummary_map_template = \"\"\"Write a short summary of the following text:\n\n{context}\n\nSUMMARY:\n\"\"\"\n\nsummary_reduce_template = \"\"\"The following text is a set of summaries:\n\n{doc_summaries}\n\nCreate a cohesive summary from the above text.\nSUMMARY:\"\"\"\n\n\nfrom langchain.chains import LLMChain, ReduceDocumentsChain, MapReduceDocumentsChain, StuffDocumentsChain\nfrom langchain.docstore.document import Document\nfrom langchain.prompts import PromptTemplate\nfrom langchain_openai import ChatOpenAI\n\ndef summarize_document(document: list[Document]):\n    # Chain to generate a summary from each chunk\n    llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model=\"gpt-4-0125-preview\")\n    map_prompt = PromptTemplate.from_template(summary_map_template)\n    map_chain = LLMChain(prompt=map_prompt, llm=llm)\n\n    # Chain to generate one cohesive summary from the summaries\n    reduce_prompt = PromptTemplate.from_template(summary_reduce_template)\n    reduce_chain = LLMChain(prompt=reduce_prompt, llm=llm)\n    stuff_chain = StuffDocumentsChain(llm_chain=reduce_chain, document_variable_name=\"doc_summaries\")\n    reduce_docs_chain = ReduceDocumentsChain(combine_documents_chain=stuff_chain)\n\n    # The complete map reduction chain\n    map_reduce_chain = MapReduceDocumentsChain(\n        llm_chain=map_chain,\n        document_variable_name=\"content\",\n        reduce_documents_chain=reduce_docs_chain\n    )\n\n    splitdocs = split_document_by_tokens(document, 15000, 200)\n    summary = map_reduce_chain.run(splitdocs)\n    return summary"
+  },
+  {
+    "objectID": "posts/presentation/presentation.html",
+    "href": "posts/presentation/presentation.html",
+    "title": "Presentation",
+    "section": "",
+    "text": "This is a post with executable code.\n%pip install langchain langchain-community langchain-openai unstructured openai pypdf -Uq\n\nNote: you may need to restart the kernel to use updated packages.\n\n\n\n[notice] A new release of pip is available: 23.0.1 -&gt; 24.0\n[notice] To update, run: pythonw.exe -m pip install --upgrade pip\nfrom langchain.document_loaders import PyPDFLoader, UnstructuredExcelLoader, UnstructuredWordDocumentLoader\nfrom dotenv import load_dotenv\nimport os\n\nload_dotenv()\nOPENAI_API_KEY = os.getenv(\"OPENAI_API_KEY\")\nPERSONAL_API_KEY = os.getenv(\"MY_OPEN_AI_API_KEY\")\nfrom langchain_openai import ChatOpenAI\n\nllm = ChatOpenAI(openai_api_key=PERSONAL_API_KEY, model=\"gpt-4-0125-preview\")"
+  },
+  {
+    "objectID": "posts/presentation/presentation.html#load-test-documents",
+    "href": "posts/presentation/presentation.html#load-test-documents",
+    "title": "Presentation",
+    "section": "Load test documents",
+    "text": "Load test documents\nDocument loaders\n\nloader_word = UnstructuredWordDocumentLoader(\"../../content/DPS Kvalifikasjonsgrunnlag - applikasjonsforvaltning V 2.0.docx\")\nloader_pdf = PyPDFLoader(\"../../content/Del-A-Konkurransegrunnlag-aapen-anbudskonkurranse-FOA-del-III xx.pdf\")\nloader_excel = UnstructuredExcelLoader(\"../../content/test.xlsx\")\n\nLoad data from files\n\ndata_word = loader_word.load()\ndata_pdf = loader_pdf.load()\ndata_excel = loader_excel.load()\n\n\nimport re\n\ndef clean_text(text: str):\n    # Remove excessive newlines and keep only ASCII + æøå characters.\n    text = re.sub(r'\\n{2,}', '\\n', text)\n    text = re.sub(r'[^\\x00-\\x7FæøåÆØÅ]+', '', text)\n    # Remove empty strings\n    text = \"\\n\".join([line for line in text.split('\\n') if line.strip() != ''])\n    return text\n\n\nfrom langchain_core.documents import Document\nimport pypdf\n\ndef process_pdf(data) -&gt; Document:\n    \"\"\"\n    Reads a pdf file from the stream, and returns the read text as a Document\n    \"\"\"\n    reader = pypdf.PdfReader(data)\n    text = ''\n    for page_num in range(len(reader.pages)):\n        text += reader.pages[page_num].extract_text()\n    cleaned_text = clean_text(text)\n    doc = Document(page_content=cleaned_text)\n    return doc\n\n\ndoc = process_pdf(\"../../content/Del-A-Konkurransegrunnlag-aapen-anbudskonkurranse-FOA-del-III xx.pdf\")\n\n\nimport csv\ntest_file_name = '../../content/test_file.csv'\nwith open(test_file_name, 'w', newline='') as file:\n    writer = csv.writer(file)\n    writer.writerow(['Column1', 'Column2', 'Column3'])\n    writer.writerow(['Data1', 'Data2', 'Data3'])\n\n\nfrom langchain_community.document_loaders import UnstructuredCSVLoader\nloader_csv = UnstructuredCSVLoader(\"../../content/test_file.csv\")\ndata_csv = loader_csv.load()\n\n\ndata_csv\n\n[Document(page_content='\\n\\n\\nColumn1\\nColumn2\\nColumn3\\n\\n\\nData1\\nData2\\nData3\\n\\n\\n', metadata={'source': '../../content/test_file.csv'})]"
   }
 ]

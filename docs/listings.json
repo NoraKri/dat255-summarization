@@ -3,7 +3,9 @@
     "listing": "/index.html",
     "items": [
       "/posts/kmeans-clustering/k-means-clustering.html",
-      "/posts/summarization/index.html"
+      "/posts/summarization/index.html",
+      "/posts/presentation/presentation.html",
+      "/posts/map-reduction/map-reduction.html"
     ]
   }
 ]
