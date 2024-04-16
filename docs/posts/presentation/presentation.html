@@ -9,7 +9,7 @@
 <meta name="author" content="Nora Kristiansen, Torjørn Vatnelid">
 <meta name="dcterms.date" content="2024-04-15">
 
-<title>dat255-blog - Presentation</title>
+<title>DAT255 Course Project - Presentation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -115,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../../index.html">
-    <span class="navbar-title">dat255-blog</span>
+    <span class="navbar-title">DAT255 Course Project</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -128,15 +128,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link" href="../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/NoraKri"> <i class="bi bi-github" role="img">
 </i> 
-<span class="menu-text"></span></a>
+<span class="menu-text">Nora Github</span></a>
   </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/torvat"> <i class="bi bi-github" role="img">
 </i> 
-<span class="menu-text"></span></a>
+<span class="menu-text">Torbjørn Github</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -191,92 +191,90 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>This is a post with executable code.</p>
-<div id="ef362a2a" class="cell" data-executioninfo="{&quot;elapsed&quot;:3893,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013531109,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="1">
+<div id="631258a9" class="cell" data-executioninfo="{&quot;elapsed&quot;:3893,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013531109,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>pip install langchain langchain<span class="op">-</span>community langchain<span class="op">-</span>openai unstructured openai pypdf <span class="op">-</span>Uq</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Note: you may need to restart the kernel to use updated packages.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
 <pre><code>
-[notice] A new release of pip is available: 23.0.1 -&gt; 24.0
-[notice] To update, run: pythonw.exe -m pip install --upgrade pip</code></pre>
+[notice] A new release of pip is available: 23.2.1 -&gt; 24.0
+[notice] To update, run: pip3 install --upgrade pip
+Note: you may need to restart the kernel to use updated packages.</code></pre>
 </div>
 </div>
-<div id="43167ab0" class="cell" data-executioninfo="{&quot;elapsed&quot;:1306,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013435174,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.document_loaders <span class="im">import</span> PyPDFLoader, UnstructuredExcelLoader, UnstructuredWordDocumentLoader</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="2ebebf2a" class="cell" data-executioninfo="{&quot;elapsed&quot;:1306,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013435174,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.document_loaders <span class="im">import</span> PyPDFLoader, UnstructuredExcelLoader, UnstructuredWordDocumentLoader</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="e387a504" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>OPENAI_API_KEY <span class="op">=</span> os.getenv(<span class="st">"OPENAI_API_KEY"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>PERSONAL_API_KEY <span class="op">=</span> os.getenv(<span class="st">"MY_OPEN_AI_API_KEY"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="ae35b874" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>OPENAI_API_KEY <span class="op">=</span> os.getenv(<span class="st">"OPENAI_API_KEY"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>PERSONAL_API_KEY <span class="op">=</span> os.getenv(<span class="st">"MY_OPEN_AI_API_KEY"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="dc429623" class="cell" data-executioninfo="{&quot;elapsed&quot;:2397,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013437568,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_openai <span class="im">import</span> ChatOpenAI</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>llm <span class="op">=</span> ChatOpenAI(openai_api_key<span class="op">=</span>PERSONAL_API_KEY, model<span class="op">=</span><span class="st">"gpt-4-0125-preview"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="8a393f05" class="cell" data-executioninfo="{&quot;elapsed&quot;:2397,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013437568,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_openai <span class="im">import</span> ChatOpenAI</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>llm <span class="op">=</span> ChatOpenAI(openai_api_key<span class="op">=</span>PERSONAL_API_KEY, model<span class="op">=</span><span class="st">"gpt-4-0125-preview"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="load-test-documents" class="level2">
 <h2 class="anchored" data-anchor-id="load-test-documents">Load test documents</h2>
 <p>Document loaders</p>
-<div id="aee6bdc8" class="cell" data-executioninfo="{&quot;elapsed&quot;:524,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013438089,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>loader_word <span class="op">=</span> UnstructuredWordDocumentLoader(<span class="st">"../../content/DPS Kvalifikasjonsgrunnlag - applikasjonsforvaltning V 2.0.docx"</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>loader_pdf <span class="op">=</span> PyPDFLoader(<span class="st">"../../content/Del-A-Konkurransegrunnlag-aapen-anbudskonkurranse-FOA-del-III xx.pdf"</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>loader_excel <span class="op">=</span> UnstructuredExcelLoader(<span class="st">"../../content/test.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="740588b6" class="cell" data-executioninfo="{&quot;elapsed&quot;:524,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013438089,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>loader_word <span class="op">=</span> UnstructuredWordDocumentLoader(<span class="st">"../../content/DPS Kvalifikasjonsgrunnlag - applikasjonsforvaltning V 2.0.docx"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>loader_pdf <span class="op">=</span> PyPDFLoader(<span class="st">"../../content/Del-A-Konkurransegrunnlag-aapen-anbudskonkurranse-FOA-del-III xx.pdf"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>loader_excel <span class="op">=</span> UnstructuredExcelLoader(<span class="st">"../../content/test.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Load data from files</p>
-<div id="3cea797c" class="cell" data-executioninfo="{&quot;elapsed&quot;:5,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013438089,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>data_word <span class="op">=</span> loader_word.load()</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>data_pdf <span class="op">=</span> loader_pdf.load()</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>data_excel <span class="op">=</span> loader_excel.load()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="ecd7e1b0" class="cell" data-executioninfo="{&quot;elapsed&quot;:5,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013438089,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data_word <span class="op">=</span> loader_word.load()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>data_pdf <span class="op">=</span> loader_pdf.load()</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>data_excel <span class="op">=</span> loader_excel.load()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="97dce821" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> clean_text(text: <span class="bu">str</span>):</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove excessive newlines and keep only ASCII + æøå characters.</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r'\n{2,}'</span>, <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>, text)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r'[^\x00-\x7FæøåÆØÅ]+'</span>, <span class="st">''</span>, text)</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove empty strings</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join([line <span class="cf">for</span> line <span class="kw">in</span> text.split(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>) <span class="cf">if</span> line.strip() <span class="op">!=</span> <span class="st">''</span>])</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="71ed5054" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> clean_text(text: <span class="bu">str</span>):</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove excessive newlines and keep only ASCII + æøå characters.</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r'\n{2,}'</span>, <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>, text)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> re.sub(<span class="vs">r'[^\x00-\x7FæøåÆØÅ]+'</span>, <span class="st">''</span>, text)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove empty strings</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join([line <span class="cf">for</span> line <span class="kw">in</span> text.split(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>) <span class="cf">if</span> line.strip() <span class="op">!=</span> <span class="st">''</span>])</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> text</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="daadbb31" class="cell" data-executioninfo="{&quot;elapsed&quot;:3,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013566686,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_core.documents <span class="im">import</span> Document</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pypdf</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_pdf(data) <span class="op">-&gt;</span> Document:</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Reads a pdf file from the stream, and returns the read text as a Document</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">=</span> pypdf.PdfReader(data)</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> <span class="st">''</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> page_num <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(reader.pages)):</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        text <span class="op">+=</span> reader.pages[page_num].extract_text()</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    cleaned_text <span class="op">=</span> clean_text(text)</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    doc <span class="op">=</span> Document(page_content<span class="op">=</span>cleaned_text)</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> doc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="35f5c9f7" class="cell" data-executioninfo="{&quot;elapsed&quot;:3,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1711013566686,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_core.documents <span class="im">import</span> Document</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pypdf</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_pdf(data) <span class="op">-&gt;</span> Document:</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Reads a pdf file from the stream, and returns the read text as a Document</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">=</span> pypdf.PdfReader(data)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> <span class="st">''</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> page_num <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(reader.pages)):</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        text <span class="op">+=</span> reader.pages[page_num].extract_text()</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    cleaned_text <span class="op">=</span> clean_text(text)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    doc <span class="op">=</span> Document(page_content<span class="op">=</span>cleaned_text)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> doc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="7cd010c9" class="cell" data-executioninfo="{&quot;elapsed&quot;:6,&quot;status&quot;:&quot;error&quot;,&quot;timestamp&quot;:1711013706986,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>doc <span class="op">=</span> process_pdf(<span class="st">"../../content/Del-A-Konkurransegrunnlag-aapen-anbudskonkurranse-FOA-del-III xx.pdf"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="136b8aa0" class="cell" data-executioninfo="{&quot;elapsed&quot;:6,&quot;status&quot;:&quot;error&quot;,&quot;timestamp&quot;:1711013706986,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>doc <span class="op">=</span> process_pdf(<span class="st">"../../content/Del-A-Konkurransegrunnlag-aapen-anbudskonkurranse-FOA-del-III xx.pdf"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="4e68e899" class="cell" data-executioninfo="{&quot;elapsed&quot;:4,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1710927452450,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> csv</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>test_file_name <span class="op">=</span> <span class="st">'../../content/test_file.csv'</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(test_file_name, <span class="st">'w'</span>, newline<span class="op">=</span><span class="st">''</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    writer <span class="op">=</span> csv.writer(<span class="bu">file</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    writer.writerow([<span class="st">'Column1'</span>, <span class="st">'Column2'</span>, <span class="st">'Column3'</span>])</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    writer.writerow([<span class="st">'Data1'</span>, <span class="st">'Data2'</span>, <span class="st">'Data3'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="650dff50" class="cell" data-executioninfo="{&quot;elapsed&quot;:4,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1710927452450,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> csv</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>test_file_name <span class="op">=</span> <span class="st">'../../content/test_file.csv'</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(test_file_name, <span class="st">'w'</span>, newline<span class="op">=</span><span class="st">''</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    writer <span class="op">=</span> csv.writer(<span class="bu">file</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    writer.writerow([<span class="st">'Column1'</span>, <span class="st">'Column2'</span>, <span class="st">'Column3'</span>])</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    writer.writerow([<span class="st">'Data1'</span>, <span class="st">'Data2'</span>, <span class="st">'Data3'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="a583b86c" class="cell" data-executioninfo="{&quot;elapsed&quot;:2782,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1710928152148,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_community.document_loaders <span class="im">import</span> UnstructuredCSVLoader</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>loader_csv <span class="op">=</span> UnstructuredCSVLoader(<span class="st">"../../content/test_file.csv"</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>data_csv <span class="op">=</span> loader_csv.load()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="6642bf77" class="cell" data-executioninfo="{&quot;elapsed&quot;:2782,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1710928152148,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_community.document_loaders <span class="im">import</span> UnstructuredCSVLoader</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>loader_csv <span class="op">=</span> UnstructuredCSVLoader(<span class="st">"../../content/test_file.csv"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>data_csv <span class="op">=</span> loader_csv.load()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="23413a30" class="cell" data-executioninfo="{&quot;elapsed&quot;:302,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1710928160634,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>data_csv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="e3eb70bb" class="cell" data-executioninfo="{&quot;elapsed&quot;:302,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1710928160634,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>data_csv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>[Document(page_content='\n\n\nColumn1\nColumn2\nColumn3\n\n\nData1\nData2\nData3\n\n\n', metadata={'source': '../../content/test_file.csv'})]</code></pre>
 </div>
@@ -285,14 +283,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="chunk-documents" class="level1">
 <h1>Chunk documents</h1>
 <p>We split the documents by tokens</p>
-<div id="a25d1a05" class="cell" data-executioninfo="{&quot;elapsed&quot;:301,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1710840992373,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_core.documents <span class="im">import</span> Document</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.text_splitter <span class="im">import</span> TokenTextSplitter</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Take in a document and chunk it if neccessary. Splits on token length.</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> split_document_by_tokens(document: <span class="bu">list</span>[Document], chunk_size: <span class="bu">int</span>, overlap: <span class="bu">int</span>):</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    splitter <span class="op">=</span> TokenTextSplitter(chunk_size<span class="op">=</span>chunk_size, chunk_overlap<span class="op">=</span>overlap)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> splitter.split_documents(document)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="7b0fd636" class="cell" data-executioninfo="{&quot;elapsed&quot;:301,&quot;status&quot;:&quot;ok&quot;,&quot;timestamp&quot;:1710840992373,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_core.documents <span class="im">import</span> Document</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.text_splitter <span class="im">import</span> TokenTextSplitter</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Take in a document and chunk it if neccessary. Splits on token length.</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> split_document_by_tokens(document: <span class="bu">list</span>[Document], chunk_size: <span class="bu">int</span>, overlap: <span class="bu">int</span>):</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    splitter <span class="op">=</span> TokenTextSplitter(chunk_size<span class="op">=</span>chunk_size, chunk_overlap<span class="op">=</span>overlap)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> splitter.split_documents(document)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="summarize-documents" class="level1">
@@ -301,63 +299,63 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Oppsummer ett eller flere dokumenter ved hjelp av map reduction.</p>
 <p>1: Map hver chunk til en oppsummering av chunken</p>
 <p>2: Reduser alle oppsummeringer til én enkelt oppsummering</p>
-<div id="4247f383" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>summary_map_template <span class="op">=</span> <span class="st">"""Skriv en kortfattet oppsummering av følgende innhold:</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="sc">{content}</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="st">OPPSUMMERING:</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>summary_reduce_template <span class="op">=</span> <span class="st">"""Følgende er et sett med oppsummeringer:</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="sc">{doc_summaries}</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="st">Lag en sammenhengende oppsumering ut fra disse.</span></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="st">OPPSUMMERING:"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="900d833d" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>summary_map_template <span class="op">=</span> <span class="st">"""Skriv en kortfattet oppsummering av følgende innhold:</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="sc">{content}</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="st">OPPSUMMERING:</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>summary_reduce_template <span class="op">=</span> <span class="st">"""Følgende er et sett med oppsummeringer:</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="sc">{doc_summaries}</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="st">Lag en sammenhengende oppsumering ut fra disse.</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="st">OPPSUMMERING:"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="d4de15bc" class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.chains <span class="im">import</span> LLMChain, ReduceDocumentsChain, MapReduceDocumentsChain, StuffDocumentsChain</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.prompts <span class="im">import</span> PromptTemplate</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> summarize_document(document: <span class="bu">list</span>[Document]):</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Takes in a list of Documents and summarizes them.</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co">    :param document: The document(s) to be summarized.</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co">    :return: A dict of named outputs Dict[str, Any].</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Chain to generate a summary from each chunk</span></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    map_prompt <span class="op">=</span> PromptTemplate.from_template(summary_map_template)</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    map_chain <span class="op">=</span> LLMChain(prompt<span class="op">=</span>map_prompt, llm<span class="op">=</span>llm)</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Chain to generate one cohesive summary from the summaries</span></span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    reduce_prompt <span class="op">=</span> PromptTemplate.from_template(summary_reduce_template)</span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    reduce_chain <span class="op">=</span> LLMChain(prompt<span class="op">=</span>reduce_prompt, llm<span class="op">=</span>llm)</span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    stuff_chain <span class="op">=</span> StuffDocumentsChain(llm_chain<span class="op">=</span>reduce_chain, document_variable_name<span class="op">=</span><span class="st">"doc_summaries"</span>)</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    reduce_docs_chain <span class="op">=</span> ReduceDocumentsChain(combine_documents_chain<span class="op">=</span>stuff_chain)</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The complete map reduction chain</span></span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    map_reduce_chain <span class="op">=</span> MapReduceDocumentsChain(</span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>        llm_chain<span class="op">=</span>map_chain,</span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>        document_variable_name<span class="op">=</span><span class="st">"content"</span>,</span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>        reduce_documents_chain<span class="op">=</span>reduce_docs_chain</span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    splitdocs <span class="op">=</span> split_document_by_tokens(document, <span class="dv">15000</span>, <span class="dv">200</span>)</span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    summary <span class="op">=</span> map_reduce_chain.run(splitdocs)</span>
-<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="985aa8a6" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.chains <span class="im">import</span> LLMChain, ReduceDocumentsChain, MapReduceDocumentsChain, StuffDocumentsChain</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.prompts <span class="im">import</span> PromptTemplate</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> summarize_document(document: <span class="bu">list</span>[Document]):</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Takes in a list of Documents and summarizes them.</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">    :param document: The document(s) to be summarized.</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">    :return: A dict of named outputs Dict[str, Any].</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Chain to generate a summary from each chunk</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    map_prompt <span class="op">=</span> PromptTemplate.from_template(summary_map_template)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    map_chain <span class="op">=</span> LLMChain(prompt<span class="op">=</span>map_prompt, llm<span class="op">=</span>llm)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Chain to generate one cohesive summary from the summaries</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    reduce_prompt <span class="op">=</span> PromptTemplate.from_template(summary_reduce_template)</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    reduce_chain <span class="op">=</span> LLMChain(prompt<span class="op">=</span>reduce_prompt, llm<span class="op">=</span>llm)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    stuff_chain <span class="op">=</span> StuffDocumentsChain(llm_chain<span class="op">=</span>reduce_chain, document_variable_name<span class="op">=</span><span class="st">"doc_summaries"</span>)</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    reduce_docs_chain <span class="op">=</span> ReduceDocumentsChain(combine_documents_chain<span class="op">=</span>stuff_chain)</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The complete map reduction chain</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    map_reduce_chain <span class="op">=</span> MapReduceDocumentsChain(</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>        llm_chain<span class="op">=</span>map_chain,</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>        document_variable_name<span class="op">=</span><span class="st">"content"</span>,</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>        reduce_documents_chain<span class="op">=</span>reduce_docs_chain</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>    splitdocs <span class="op">=</span> split_document_by_tokens(document, <span class="dv">15000</span>, <span class="dv">200</span>)</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>    summary <span class="op">=</span> map_reduce_chain.run(splitdocs)</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="78e3c115" class="cell" data-executioninfo="{&quot;elapsed&quot;:253,&quot;status&quot;:&quot;error&quot;,&quot;timestamp&quot;:1710160911975,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>summarized_word <span class="op">=</span> summarize_document(data_pdf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="b037fd4f" class="cell" data-executioninfo="{&quot;elapsed&quot;:253,&quot;status&quot;:&quot;error&quot;,&quot;timestamp&quot;:1710160911975,&quot;user&quot;:{&quot;displayName&quot;:&quot;Nora Kristiansen&quot;,&quot;userId&quot;:4695517471848529000},&quot;user_tz&quot;:-60}" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>summarized_word <span class="op">=</span> summarize_document(data_pdf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>C:\Users\Torva\IT-Repo\DAT255-Deep-Learning\dat255-summarization\venv\lib\site-packages\langchain_core\_api\deprecation.py:117: LangChainDeprecationWarning: The function `run` was deprecated in LangChain 0.1.0 and will be removed in 0.2.0. Use invoke instead.
+<pre><code>/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/langchain_core/_api/deprecation.py:117: LangChainDeprecationWarning: The function `run` was deprecated in LangChain 0.1.0 and will be removed in 0.2.0. Use invoke instead.
   warn_deprecated(</code></pre>
 </div>
 </div>
-<div id="7ecf90e1" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>summarized_word</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="c449f527" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>summarized_word</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="17">
-<pre><code>'Statens pensjonskasse (SPK) har annonsert en åpen anbudskonkurranse for etablering av en rammeavtale med en lisenspartner for programvareløsninger, med et anslag på verdi mellom 80 til 150 millioner NOK ekskl. mva. over en varighet på 2 år, med mulighet for forlengelse opptil 6 år. Hensikten er å sikre økonomisk fordelaktige og passende avtaler for kjøp og leie av programvarelisenser, inkludert rådgivning og vedlikehold, med fokus på bærekraft og miljøvennlige løsninger. Tilbudsprosessen, som krever elektronisk innsending via Mercell-portalen innen 2. mai 2024, omfatter strenge krav til dokumentasjon og kvalifikasjoner, inkludert økonomisk kapasitet, tekniske og faglige kvalifikasjoner, samt lønns- og arbeidsvilkår i Norge.\n\nLeverandører må benytte et elektronisk egenerklæringsskjema (ESPD) for å dokumentere oppfyllelse av kvalifikasjonskravene, med potensial for etterspørsel av ytterligere dokumentasjon av oppdragsgiver. Tildeling av kontrakten baseres på en vurdering av både kvalitative og kvantitative kriterier, gjennomført med en poengmodell som reflekterer kvaliteten på tilbudte produkter eller tjenester, tjenestenivå, klima- og miljøhensyn, samt pris.\n\nSPK legger vekt på konfidensialitet og offentlighet i forhold til sensitive opplysninger, og har rett til å avlyse konkurransen om det foreligger saklig grunn. En karensperiode vil bli innført mellom meddelelse om tildeling og kontraktsignering for å sikre en rettferdig og transparent prosess. Dette initiativet følger Lov om offentlige anskaffelser og er designet for å gi alle interesserte leverandører en lik mulighet til å konkurrere på grunnlag av deres kvalifikasjoner og tilbud.'</code></pre>
+<pre><code>'Statens pensjonskasse (SPK) har utlyst en åpen anbudskonkurranse for innkjøp av programvareløsninger, med mål om å inngå en rammeavtale for levering, rådgivning og vedlikehold av programvarelisenser. Konkurransen, som har et anslått kontraktsomfang på 80 til 150 millioner kroner ekskl. mva. over en periode på 2 år med mulighet for forlengelse opptil 6 år, er designet for å være transparent og rettferdig, oppfyller de nødvendige kravene i Forskrift om offentlige anskaffelser (FOA) del I og III, og overskrider EØS-terskelen. \n\nAnbudsprosessen vektlegger miljøvennlige løsninger og setter krav til leverandørenes kvalifikasjoner, økonomiske og finansielle kapasitet, samt tekniske og faglige kvalifikasjoner. Det kreves bruk av det europeiske egenerklæringsskjemaet (ESPD) for foreløpig bekreftelse på kvalifikasjoner, og leverandører må levere detaljert dokumentasjon, inkludert et signert tilbudsbrev, besvarelse på kravspesifikasjonen, og priser. Tilbudsprosedyren understreker også behovet for å beskytte konfidensiell informasjon, mens det oppfordres til å inkludere en sladdet versjon av tilbudet for innsynsforespørsler.\n\nTildelingskriteriene inneholder en balanse mellom kvalitative vurderinger og pris-/kostnadsevalueringer, med særlig fokus på nye dataplattformlisenser, kvalitet, tjenestenivå, support, og klima- og miljøhensyn. Kommunikasjon rundt konkurransen og innsendelse av tilbud skal foregå gjennom Mercell-plattformen, med en frist for tilbudslevering satt til 2. mai 2024.\n\nSPK forbeholder seg retten til å avlyse konkurransen under visse omstendigheter, med skriftlig meddelelse til alle deltakere. Dette initiativet reflekterer SPKs engasjement for rettferdige, effektive og bærekraftige anskaffelsesprosesser, samt deres overordnede mål om å fremme bærekraft i sine operasjoner.'</code></pre>
 </div>
 </div>
 

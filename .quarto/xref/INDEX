@@ -1,0 +1,23 @@
+{
+  "posts/map-reduction/map-reduction.qmd": {
+    "map-reduction.html": "6a8abe65"
+  },
+  "posts/summarization/index.qmd": {
+    "index.html": "cfa4f464"
+  },
+  "posts/presentation/presentation.qmd": {
+    "presentation.html": "a436232d"
+  },
+  "posts/kmeans-clustering/clustering.qmd": {
+    "clustering.html": "7b2facb7"
+  },
+  "posts/kmeans-clustering/k-means-clustering.ipynb": {
+    "k-means-clustering.html": "615b0a51"
+  },
+  "index.qmd": {
+    "index.html": "a45f8f1c"
+  },
+  "about.qmd": {
+    "about.html": "3877a720"
+  }
+}

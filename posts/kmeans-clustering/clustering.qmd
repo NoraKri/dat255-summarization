@@ -14,14 +14,4 @@ A solution is K-means clustering, where each chunk is embedded, and then cluster
 Another advantage is the amount of requests sent to the API. While Map Reduction sends many requests, clustering will send only one request, saving a lot of money.
 py
 ```{python}
-from dotenv import load_dotenv
-from utils import read_files, split_document_by_tokens
-from pathlib import Path
-
-import os
-
-load_dotenv()
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-documents = read_files(Path('./content/nord-universitet'))
-doc = documents[1]
 ```
