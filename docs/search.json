@@ -1,24 +1,17 @@
 [
   {
-    "objectID": "posts/welcome/index.html",
-    "href": "posts/welcome/index.html",
-    "title": "Welcome To My Blog",
-    "section": "",
-    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Exploration of summarization techniques using machine learning",
-    "section": "",
-    "text": "Summarization techniques using Large Language Models\n\n\n\n\n\n\nllm\n\n\n\n\n\n\n\n\n\nApr 16, 2024\n\n\nNora Kristiansen og Torbjørn Vatnelid\n\n\n\n\n\n\n\n\n\n\n\n\nPost With Code\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nApr 15, 2024\n\n\nHarlow Malloc\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nApr 12, 2024\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
-  },
-  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
     "section": "",
     "text": "An exploration of different summarization techniques. Done as a course project for DAT255 Deep Learning."
+  },
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
   },
   {
     "objectID": "posts/post-with-code/index.html",
@@ -32,6 +25,27 @@
     "href": "posts/summarization/index.html",
     "title": "Summarization techniques using Large Language Models",
     "section": "",
-    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+    "text": "This blog post talks about our course project in DAT255 Deep Learning Engineering.\nThe course project is related to our bachelor thesis. As part of our project, we are to create summaries for tender competitions (Anbudskonkurranser). These competitions come with a varying amount of documents, with varying length, file format and quality. So, this course project will be preparatory work for our bachelor project. We wish to explore different methods to summarize text using commercially available LLMs (Large Language Models). Since we do not know the specific documents we are to summarize, no specific cleaning or preprocessing can be done, everything has to be generic."
+  },
+  {
+    "objectID": "posts/summarization/index.html#document-summaries-with-langchain",
+    "href": "posts/summarization/index.html#document-summaries-with-langchain",
+    "title": "Summarization techniques using Large Language Models",
+    "section": "Document Summaries with Langchain",
+    "text": "Document Summaries with Langchain\n  In this project we have been exploring different methods to summarize text using commercially available LLMs. To do this, we have used the framework Langchain extensively.\nLangchain is a framework for developing applications powered by language models. You can read more about Langchain here.\nThe summarization problem\n  All LLMs have a token limit due to how they are designed and trained. This token limit gives a restriction on how much input you can give the LLM, and how much output you can expect back.\nHere are some well known LLMs and their token limits:\n\n\n\nModel\nToken Limit\nMax Output Tokens\n\n\n\n\nGPT-4-Turbo-Preview\n128 000\n4096\n\n\nGPT-3.5-Turbo\n16 385\n4096\n\n\nClaude 3 Opus/Sonnet/Haiku\n200 000\n4096\n\n\n\nAs we can see, most modern LLMs have a pretty big context window. But what if you want to summarize a huge document with over 500 pages, or maybe you have several documents to combine and summarize? This can quickly exceed the token limit if you want to do this in a single call to the LLM.\nThis means that summarizing the entire document at once is not always feasible, so we need new strategies for generating good summaries for long texts.\nAnd, even if summarizing the entire document is possible, cost is an important factor. Commercial LLMs charge money per input and output token, and summarizing many huge documents will quickly rack up your bill.\n\nStuffing the documents\nDocument stuffing is a method used for smaller documents. Like the name says, this method “Stuffs” the document or documents into the prompt. In Langchain a Chain called “StuffDocumentsChain” is used.\nA StuffDocumentsChain prompt will typically describe the task, and then insert the document(s). However, as we have discussed earlier, this is not a good approch if you have large documents, because this chain only queries the API with one API call containing the whole document.\n\n\n\nimg\n\n\n\n\nMap Reduction\nMap reduction is another common approach for summarizing documents. This method is able to summarize documents which exceed the LLMs token limit by first breaking the documents into chunks which fit in the context window, then generating summaries for each chunk, and lastly generating a final summary from all the summaries.\nThis method lets us generate summaries for texts of arbitrary length (if the combined summaries are still too long, you can generate a summary from a group of summaries until they will fit in the context window), but as discussed earlier, cost is a problem. Map Reduction does many calls to the API, and will use a lot of input and output tokens in the process.\n\n\n\nimg"
+  },
+  {
+    "objectID": "posts/summarization/index.html#clustering",
+    "href": "posts/summarization/index.html#clustering",
+    "title": "Summarization techniques using Large Language Models",
+    "section": "Clustering",
+    "text": "Clustering\nIn this method, you first break the document into chunks, then generate embeddings from these chunks. An embedding in this context is a vector representation of text. We use embeddings because machine learning models work with numbers only, and cannot understand human readable text directly. Embeddings contain many dimensions and captures the semantic and syntactic meaning of a piece of text. If you embed many different words, semantically similar words like tree and forest will end up closer together in the vector space than semantically different words like lion and truck.\nWe can use this to our advantage when summarizing documents. If we embed all our chunks, then chunks that are talking about the same topic will be closer together in the vector space. Then, we can cluster the chunks together based on their semantic meaning. The image below shows a “squashed down” visualization (the embedding vectors have a dimension of 1536, here they are reduced to 2 dimensions) of the embedding vector space for a tender competition.\n\n\n\nimg\n\n\nTo create these clusters, a clustering algorithm is used. The algorithm identifies clusters, then we find the center of the cluster and extract the nearest chunk, which will represent the “average meaning” of that cluster.\nThe goal of this method is to identify key topics in the text and assemble them to create a context-rich summary while spending as little as possible on API fees."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Exploration of summarization techniques using machine learning",
+    "section": "",
+    "text": "Summarization techniques using Large Language Models\n\n\n\n\n\n\nllm\n\n\n\n\n\n\n\n\n\nApr 16, 2024\n\n\nNora Kristiansen og Torbjørn Vatnelid\n\n\n\n\n\n\n\n\n\n\n\n\nPost With Code\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nApr 15, 2024\n\n\nHarlow Malloc\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nApr 12, 2024\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
   }
 ]
