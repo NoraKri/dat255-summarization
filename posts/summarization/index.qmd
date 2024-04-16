@@ -1,0 +1,12 @@
+---
+title: "Summarization techniques using Large Language Models"
+author: "Nora Kristiansen og Torbjørn Vatnelid"
+date: "2024-04-16"
+categories: [llm]
+---
+
+This is the first post in a Quarto blog. Welcome!
+
+![](thumbnail.jpg)
+
+Since this post doesn't specify an explicit `image`, the first image in the post will be used in the listing page of posts.
