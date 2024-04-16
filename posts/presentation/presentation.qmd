@@ -1,0 +1,198 @@
+---
+title: "Presentation"
+author: "Nora Kristiansen, Torjørn Vatnelid"
+date: "2024-04-15"
+categories: [code, analysis, llm]
+---
+
+This is a post with executable code.
+
+```{python}
+#| colab: {base_uri: 'https://localhost:8080/'}
+#| executionInfo: {elapsed: 3893, status: ok, timestamp: 1711013531109, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+%pip install langchain langchain-community langchain-openai unstructured openai pypdf -Uq
+```
+
+```{python}
+#| executionInfo: {elapsed: 1306, status: ok, timestamp: 1711013435174, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+from langchain.document_loaders import PyPDFLoader, UnstructuredExcelLoader, UnstructuredWordDocumentLoader
+```
+
+```{python}
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+PERSONAL_API_KEY = os.getenv("MY_OPEN_AI_API_KEY")
+```
+
+
+
+```{python}
+#| executionInfo: {elapsed: 2397, status: ok, timestamp: 1711013437568, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(openai_api_key=PERSONAL_API_KEY, model="gpt-4-0125-preview")
+```
+
+## Load test documents
+
+Document loaders
+
+```{python}
+#| executionInfo: {elapsed: 524, status: ok, timestamp: 1711013438089, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+loader_word = UnstructuredWordDocumentLoader("../../content/DPS Kvalifikasjonsgrunnlag - applikasjonsforvaltning V 2.0.docx")
+loader_pdf = PyPDFLoader("../../content/Del-A-Konkurransegrunnlag-aapen-anbudskonkurranse-FOA-del-III xx.pdf")
+loader_excel = UnstructuredExcelLoader("../../content/test.xlsx")
+```
+
+Load data from files
+
+```{python}
+#| executionInfo: {elapsed: 5, status: ok, timestamp: 1711013438089, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+data_word = loader_word.load()
+data_pdf = loader_pdf.load()
+data_excel = loader_excel.load()
+```
+
+```{python}
+import re
+
+def clean_text(text: str):
+    # Remove excessive newlines and keep only ASCII + æøå characters.
+    text = re.sub(r'\n{2,}', '\n', text)
+    text = re.sub(r'[^\x00-\x7FæøåÆØÅ]+', '', text)
+    # Remove empty strings
+    text = "\n".join([line for line in text.split('\n') if line.strip() != ''])
+    return text
+```
+
+```{python}
+#| executionInfo: {elapsed: 3, status: ok, timestamp: 1711013566686, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+from langchain_core.documents import Document
+import pypdf
+
+def process_pdf(data) -> Document:
+    """
+    Reads a pdf file from the stream, and returns the read text as a Document
+    """
+    reader = pypdf.PdfReader(data)
+    text = ''
+    for page_num in range(len(reader.pages)):
+        text += reader.pages[page_num].extract_text()
+    cleaned_text = clean_text(text)
+    doc = Document(page_content=cleaned_text)
+    return doc
+```
+
+```{python}
+#| colab: {base_uri: 'https://localhost:8080/', height: 263}
+#| executionInfo: {elapsed: 6, status: error, timestamp: 1711013706986, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+doc = process_pdf("../../content/Del-A-Konkurransegrunnlag-aapen-anbudskonkurranse-FOA-del-III xx.pdf")
+```
+
+```{python}
+#| executionInfo: {elapsed: 4, status: ok, timestamp: 1710927452450, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+import csv
+test_file_name = '../../content/test_file.csv'
+with open(test_file_name, 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Column1', 'Column2', 'Column3'])
+    writer.writerow(['Data1', 'Data2', 'Data3'])
+```
+
+```{python}
+#| executionInfo: {elapsed: 2782, status: ok, timestamp: 1710928152148, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+from langchain_community.document_loaders import UnstructuredCSVLoader
+loader_csv = UnstructuredCSVLoader("../../content/test_file.csv")
+data_csv = loader_csv.load()
+```
+
+```{python}
+#| colab: {base_uri: 'https://localhost:8080/'}
+#| executionInfo: {elapsed: 302, status: ok, timestamp: 1710928160634, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+data_csv
+```
+
+# Chunk documents
+We split the documents by tokens
+
+```{python}
+#| executionInfo: {elapsed: 301, status: ok, timestamp: 1710840992373, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+from langchain_core.documents import Document
+from langchain.text_splitter import TokenTextSplitter
+
+# Take in a document and chunk it if neccessary. Splits on token length.
+def split_document_by_tokens(document: list[Document], chunk_size: int, overlap: int):
+    splitter = TokenTextSplitter(chunk_size=chunk_size, chunk_overlap=overlap)
+    return splitter.split_documents(document)
+```
+
+# Summarize Document(s)
+
+**Dette funker ikke lengre, null peiling hvorfor**
+
+Oppsummer ett eller flere dokumenter ved hjelp av map reduction.
+
+1: Map hver chunk til en oppsummering av chunken
+
+2: Reduser alle oppsummeringer til én enkelt oppsummering
+
+```{python}
+summary_map_template = """Skriv en kortfattet oppsummering av følgende innhold:
+
+{content}
+
+OPPSUMMERING:
+"""
+
+summary_reduce_template = """Følgende er et sett med oppsummeringer:
+
+{doc_summaries}
+
+Lag en sammenhengende oppsumering ut fra disse.
+OPPSUMMERING:"""
+```
+
+```{python}
+from langchain.chains import LLMChain, ReduceDocumentsChain, MapReduceDocumentsChain, StuffDocumentsChain
+from langchain.prompts import PromptTemplate
+
+def summarize_document(document: list[Document]):
+    """
+    Takes in a list of Documents and summarizes them.
+    :param document: The document(s) to be summarized.
+    :return: A dict of named outputs Dict[str, Any].
+    """
+    # Chain to generate a summary from each chunk
+    map_prompt = PromptTemplate.from_template(summary_map_template)
+    map_chain = LLMChain(prompt=map_prompt, llm=llm)
+
+    # Chain to generate one cohesive summary from the summaries
+    reduce_prompt = PromptTemplate.from_template(summary_reduce_template)
+    reduce_chain = LLMChain(prompt=reduce_prompt, llm=llm)
+    stuff_chain = StuffDocumentsChain(llm_chain=reduce_chain, document_variable_name="doc_summaries")
+    reduce_docs_chain = ReduceDocumentsChain(combine_documents_chain=stuff_chain)
+
+    # The complete map reduction chain
+    map_reduce_chain = MapReduceDocumentsChain(
+        llm_chain=map_chain,
+        document_variable_name="content",
+        reduce_documents_chain=reduce_docs_chain
+    )
+
+    splitdocs = split_document_by_tokens(document, 15000, 200)
+    summary = map_reduce_chain.run(splitdocs)
+    return summary
+```
+
+```{python}
+#| colab: {base_uri: 'https://localhost:8080/', height: 329}
+#| executionInfo: {elapsed: 253, status: error, timestamp: 1710160911975, user: {displayName: Nora Kristiansen, userId: 04695517471848529129}, user_tz: -60}
+summarized_word = summarize_document(data_pdf)
+```
+
+```{python}
+summarized_word
+```
