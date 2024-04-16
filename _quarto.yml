@@ -3,14 +3,16 @@ project:
   output-dir: docs
 
 website:
-  title: "dat255-blog"
+  title: "DAT255 Course Project"
   navbar:
     right:
       - about.qmd
       - icon: github
-        href: https://github.com/
-      - icon: twitter
-        href: https://twitter.com
+        text: Nora Github
+        href: https://github.com/NoraKri
+      - icon: github
+        text: Torbjørn Github
+        href: https://github.com/torvat
 format:
   html:
     theme: cosmo
