@@ -196,39 +196,30 @@ ul.task-list li input[type="checkbox"] {
 <h3 class="anchored" data-anchor-id="stuffing-the-documents">Stuffing the documents</h3>
 <p>Document stuffing is a method used for smaller documents. Like the name says, this method “Stuffs” the document or documents into the prompt. In Langchain a Chain called “StuffDocumentsChain” is used.</p>
 <p>A StuffDocumentsChain prompt will typically describe the task, and then insert the document(s). However, as we have discussed earlier, this is not a good approch if you have large documents, because this chain only queries the API with one API call containing the whole document.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="stuff_chain.jpg" class="img-fluid figure-img"></p>
-<figcaption>img</figcaption>
-</figure>
-</div>
+<p><img src="stuff_chain.jpg" class="img-fluid"></p>
 </section>
 <section id="map-reduction" class="level3">
 <h3 class="anchored" data-anchor-id="map-reduction">Map Reduction</h3>
 <p>Map reduction is another common approach for summarizing documents. This method is able to summarize documents which exceed the LLMs token limit by first breaking the documents into chunks which fit in the context window, then generating summaries for each chunk, and lastly generating a final summary from all the summaries.</p>
 <p>This method lets us generate summaries for texts of arbitrary length (if the combined summaries are still too long, you can generate a summary from a group of summaries until they will fit in the context window), but as discussed earlier, cost is a problem. Map Reduction does many calls to the API, and will use a lot of input and output tokens in the process.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="map_reduce_chain.webp" class="img-fluid figure-img"></p>
-<figcaption>img</figcaption>
-</figure>
-</div>
+<p><img src="map_reduce_chain.webp" class="img-fluid"></p>
 </section>
 </section>
 <section id="clustering" class="level2">
 <h2 class="anchored" data-anchor-id="clustering">Clustering</h2>
 <p>In this method, you first break the document into chunks, then generate <em>embeddings</em> from these chunks. An embedding in this context is a vector representation of text. We use embeddings because machine learning models work with numbers only, and cannot understand human readable text directly. Embeddings contain many dimensions and captures the semantic and syntactic meaning of a piece of text. If you embed many different words, semantically similar words like <em>tree</em> and <em>forest</em> will end up closer together in the vector space than semantically different words like <em>lion</em> and <em>truck</em>.</p>
 <p>We can use this to our advantage when summarizing documents. If we embed all our chunks, then chunks that are talking about the same topic will be closer together in the vector space. Then, we can <em>cluster</em> the chunks together based on their semantic meaning. The image below shows a “squashed down” visualization (the embedding vectors have a dimension of 1536, here they are reduced to 2 dimensions) of the embedding vector space for a tender competition.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="nord_clusters.png" class="img-fluid figure-img"></p>
-<figcaption>img</figcaption>
-</figure>
-</div>
+<p><img src="nord_clusters.png" class="img-fluid"></p>
 <p>To create these clusters, a clustering algorithm is used. The algorithm identifies clusters, then we find the center of the cluster and extract the nearest chunk, which will represent the “average meaning” of that cluster.</p>
 <p>The goal of this method is to identify key topics in the text and assemble them to create a context-rich summary while spending as little as possible on API fees.</p>
+<section id="sources-further-reading" class="level3">
+<h3 class="anchored" data-anchor-id="sources-further-reading">Sources / Further reading</h3>
+<p>Summarizing long documents with AI - https://pashpashpash.substack.com/p/tackling-the-challenge-of-document</p>
+<p>5 Levels of Summarization: Novice to Expert - https://github.com/gkamradt/langchain-tutorials/blob/main/data_generation/5%20Levels%20Of%20Summarization%20-%20Novice%20To%20Expert.ipynb</p>
+<p>Clustering for QA - https://github.com/mendableai/QA_clustering/blob/main/notebooks/clustering_approach.ipynb</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

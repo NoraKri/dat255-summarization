@@ -13,5 +13,8 @@
   },
   "posts/summarization/index.qmd": {
     "index.html": "5507f695"
+  },
+  "posts/kmeans-clustering/k-means-clustering.ipynb": {
+    "k-means-clustering.html": "8c1fda66"
   }
 }

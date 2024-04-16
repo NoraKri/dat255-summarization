@@ -16,5 +16,8 @@ format:
     theme: cosmo
     css: styles.css
 
-
+manuscript: 
+  notebooks: 
+    - notebook: posts/kmeans-clustering/k-means-clustering.ipynb
+      title: Clustering
 

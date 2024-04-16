@@ -39,7 +39,7 @@ Document stuffing is a method used for smaller documents. Like the name says, th
 
  A StuffDocumentsChain prompt will typically describe the task, and then insert the document(s). However, as we have discussed earlier, this is not a good approch if you have large documents, because this chain only queries the API with one API call containing the whole document.
 
-![img](stuff_chain.jpg)
+![](stuff_chain.jpg)
 
 ### Map Reduction
 
@@ -47,7 +47,7 @@ Map reduction is another common approach for summarizing documents. This method 
 
 This method lets us generate summaries for texts of arbitrary length (if the combined summaries are still too long, you can generate a summary from a group of summaries until they will fit in the context window), but as discussed earlier, cost is a problem. Map Reduction does many calls to the API, and will use a lot of input and output tokens in the process.
 
-![img](map_reduce_chain.webp)
+![](map_reduce_chain.webp)
 
 ## Clustering
 
@@ -55,8 +55,16 @@ In this method, you first break the document into chunks, then generate *embeddi
 
 We can use this to our advantage when summarizing documents. If we embed all our chunks, then chunks that are talking about the same topic will be closer together in the vector space. Then, we can *cluster* the chunks together based on their semantic meaning. The image below shows a "squashed down" visualization (the embedding vectors have a dimension of 1536, here they are reduced to 2 dimensions) of the embedding vector space for a tender competition. 
 
-![img](nord_clusters.png)
+![](nord_clusters.png)
 
 To create these clusters, a clustering algorithm is used. The algorithm identifies clusters, then we find the center of the cluster and extract the nearest chunk, which will represent the "average meaning" of that cluster.
 
 The goal of this method is to identify key topics in the text and assemble them to create a context-rich summary while spending as little as possible on API fees.
+
+### Sources / Further reading
+
+Summarizing long documents with AI - https://pashpashpash.substack.com/p/tackling-the-challenge-of-document
+
+5 Levels of Summarization: Novice to Expert - https://github.com/gkamradt/langchain-tutorials/blob/main/data_generation/5%20Levels%20Of%20Summarization%20-%20Novice%20To%20Expert.ipynb
+
+Clustering for QA - https://github.com/mendableai/QA_clustering/blob/main/notebooks/clustering_approach.ipynb
