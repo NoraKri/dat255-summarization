@@ -1,7 +1,7 @@
 ---
 title: "KMeans Clustering"
 author: "Nora Kristiansen og Torbjørn Vatnelid"
-date: "2024-04-15"
+date: "2024-04-13"
 categories: [llm]
 format:
   html:
