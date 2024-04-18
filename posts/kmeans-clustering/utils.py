@@ -26,7 +26,7 @@ def pdf_to_document(file) -> Document:
     for page_num in range(len(reader.pages)):
         text += reader.pages[page_num].extract_text()
     cleaned_text = clean_text(text)
-    return Document(page_content=cleaned_text)
+    return Document(page_content=cleaned_text, metadata={"source": file})
 
 def excel_to_document(file) -> Document:
     loader = UnstructuredExcelLoader(file)

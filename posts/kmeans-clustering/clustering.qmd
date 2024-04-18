@@ -3,6 +3,9 @@ title: "KMeans Clustering"
 author: "Nora Kristiansen og Torbjørn Vatnelid"
 date: "2024-04-15"
 categories: [llm]
+format:
+  html:
+    code-overflow: wrap
 ---
 
 When you reach a certain length of text to summarize, the other methods become too expensive or are not able to summarize well enough. We need to find a way to extract all the important parts of large texts like books or very big documents, and create a summary from them.
@@ -13,7 +16,7 @@ A solution is K-means clustering, where each chunk is embedded, and then cluster
 
 Another advantage is the amount of requests sent to the API. While Map Reduction sends many requests, clustering will send only one request, saving a lot of money.
 
-### Implementing KMeans Clustering
+### Loading our documents
 Let's implement this method to summarize many documents or whole books!
 
 First, we need to import some packages and load in our OpenAI API key, since we will be using OpenAI's GPT models.
@@ -28,11 +31,289 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 ```
 
-Next, we will load in our documents. Let's load in a whole tender competition.
+Next, we will load in our documents. Let's load in a whole tender competition and a whole book (Pride and Prejudice).
+```{python}
+# | code-fold: false
+anbudskonkurranse = read_files(Path('./content/nord-universitet'))
+anbudskonkurranse_filnavn = [doc.metadata["source"] for doc in anbudskonkurranse]
+print("Tender competition documents:\n")
+for konk in anbudskonkurranse_filnavn:
+    print(konk)
+
+books = read_files(Path("./content/books/"))
+pride_and_prejudice = books[0]
+print("\nBook:\n")
+print(pride_and_prejudice.metadata["source"])
+```
+
+Let's see how many tokens are in our documents!
 ```{python}
 # | code-fold: true
-documents = read_files(Path('./content/nord-universitet'))
-doc = documents[1]
-docnames = doc.metadata["source"] for doc in documents
-print(doc.metadata["source"])
+from langchain_openai import ChatOpenAI
+from langchain.schema import Document
+
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-3.5-turbo")
+
+tender_content = ""
+
+for doc in anbudskonkurranse:
+    tender_content += doc.page_content
+
+tender_documents = Document(page_content=tender_content)
+
+num_tokens_tender = llm.get_num_tokens(tender_documents.page_content)
+print(f"Number of tokens in tender competition documents: {num_tokens_tender}")
+
+num_tokens_book = llm.get_num_tokens(pride_and_prejudice.page_content)
+print(f"Number of tokens in book: {num_tokens_book}")
 ```
+
+That's a lot of tokens. If we were to use map reduction, sending all these tokens to the LLM would be pretty expensive. If we were using document stuffing, we might not be able to fit the document(s) at all!
+
+### Chunking our documents
+
+To better facilitate clustering, let's split our documents into more manageable sizes, called chunks. There are many different ways to chunk a document, the easiest being to split on specific characters, like punctuation marks. Another method is to chunk on token count, this can be nice because you know how many tokens you're sending to the LLM with each chunk.
+
+Let's try with token chunking.
+
+```{python}
+# | code-fold: false
+split_tender_competition = split_document_by_tokens(anbudskonkurranse, chunk_size=2000, overlap=200)
+
+split_book = split_document_by_tokens([pride_and_prejudice], chunk_size=2000, overlap=200)
+
+print(f"Now our tender competition is split up into {len(split_tender_competition)} documents")
+
+print(f"And our book is split up into {len(split_book)} documents")
+```
+
+### Embedding
+
+Clustering relies on embeddings to work. Embeddings are vector representations of text, so that LLMs can work with them (LLMs don't understand human readable text, they understand numbers). Similar pieces of text will be closer together in the vector space, therefore the hope is that we can "cluster" pieces of text with similar meaning together, because they are closer together in the vector space.
+
+```{python}
+from langchain_openai import OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY, model="text-embedding-3-small")
+
+tender_vectors = embeddings.embed_documents([doc.page_content for doc in split_tender_competition])
+
+book_vectors = embeddings.embed_documents([doc.page_content for doc in split_book])
+```
+
+```{python}
+# | code-fold: true
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+import numpy as np
+
+def plot_clusters(vectors, title, algo = None, ):
+    tsne = TSNE(n_components=2, random_state=42)
+    vectors = np.array(vectors)
+    reduced_data_tsne = tsne.fit_transform(vectors)
+    if algo:
+        plt.scatter(reduced_data_tsne[:, 0], reduced_data_tsne[:, 1], c=algo.labels_)
+    else:
+        plt.scatter(reduced_data_tsne[:, 0], reduced_data_tsne[:, 1])
+    plt.xlabel('Dimension 1')
+    plt.ylabel('Dimension 2')
+    plt.title(f'Cluster visualization for {title}.')
+    plt.show()
+```
+
+Let's try to visualize how our chunks look in the vector space. Please note that the embedding vectors have 1536 dimensions, and here we have squished them down to two dimension, so a lot of information will be lost. Perhaps some clustering of chunks would be easier to see with more dimensions.
+
+```{python}
+plot_clusters(vectors=book_vectors, title="Pride and Prejudice")
+plot_clusters(vectors=tender_vectors, title="the tender competition")
+```
+
+### Clustering
+
+K-means clustering is an algorithm which starts by randomly initializing the centroids of a given amount of clusters (k). A centroid is one datapoint in the center of a cluster. It then iterates through two main steps: assignment and update. 
+
+In the assignment step, each data point is assigned to the closest centroid based on a distance metric, typically Euclidean distance. In the update step, the centroids are recalculated as the mean of all data points assigned to each cluster. 
+
+This process repeats until the centroids no longer move significantly, indicating convergence. The result is a grouping of data points such that points in the same cluster are more similar to each other than to those in other clusters, based on the chosen distance metric.
+
+Note that K-means takes the amount of clusters as a parameter. For now, we'll set it manually.
+
+```{python}
+from sklearn.cluster import KMeans
+
+num_clusters = 11
+
+tender_kmeans = KMeans(n_clusters=num_clusters, random_state=42).fit(tender_vectors)
+
+book_kmeans = KMeans(n_clusters=num_clusters, random_state=42).fit(book_vectors)
+```
+
+Now let's visualize our clusters:
+
+```{python}
+# | code-fold: true
+plot_clusters(vectors=tender_vectors, algo=tender_kmeans, title="the tender competition with 11 clusters")
+plot_clusters(vectors=book_vectors, algo=book_kmeans, title="Pride and Prejudice with 11 clusters")
+```
+
+This looks alright, especially the tender competition has some clear clusters. However, how can we know that we have chosen the correct amount of clusters for our K-means algorithm?
+
+### Silhouette scoring
+
+Silhouette scoring is a method used to assess the quality of clusters when using for example K-means. The silhouette score for each data point is calculated based on two factors: 
+- The average distance between the data point and all other points in the same cluster (cohesion)
+- The average distance between the data point and all points in the nearest cluster to which the data point does not belong (separation). 
+
+We find the silhouette score for one data point by taking the difference between these two distances, normalized by the maximum of the two. This score ranges from -1 to 1, where a score close to 1 indicates that the data point clearly belongs to its own cluster, a score near 0 indicates that the point is on the border of two clusters, and a score near -1 suggests that the point may have been assigned to the wrong cluster. The overall silhouette score of the clustering is the average of the silhouette scores of all the data points.
+
+So what we can do is try many different values of k and find the silhouette score for each one, then choose the best scoring k as our cluster amount, where the score closest to 1 is best.
+
+```{python}
+from sklearn.metrics import silhouette_score
+
+def find_optimal_clusters(vectors, max_k):
+    score = -1
+    best_n_clusters = 0
+    for k in range(3, max_k):
+        kmeans = KMeans(n_clusters=k, random_state=1).fit_predict(vectors)
+        new_score = silhouette_score(vectors, kmeans)
+        if new_score > score:
+            best_n_clusters = k
+            score = new_score
+        print(f"For n_clusters = {k}, silhouette score is {new_score})")
+    print(f"Best number of clusters is {best_n_clusters}")
+    return best_n_clusters
+```
+
+Let's find the optimal number of cluster for our tender competition:
+
+```{python}
+tender_num_clusters = find_optimal_clusters(tender_vectors, max_k=20)
+tender_kmeans = KMeans(n_clusters=tender_num_clusters, random_state=1).fit(tender_vectors)
+plot_clusters(vectors=tender_vectors, algo=tender_kmeans, title=f"our tender competition with {tender_num_clusters} clusters")
+```
+
+And then for our book:
+
+```{python}
+# | code-fold: true
+book_num_clusters = find_optimal_clusters(book_vectors, max_k=20)
+book_kmeans = KMeans(n_clusters=book_num_clusters, random_state=1).fit(book_vectors)
+plot_clusters(vectors=book_vectors, algo=book_kmeans, title=f"Pride and Prejudice with {book_num_clusters} clusters")
+```
+
+### Summarization using K-means
+
+Now for the final piece of the puzzle. We have the clusters, now what? Let's find the chunk which sits closest to the center of each cluster.
+
+```{python}
+def get_key_chunks(vectors, alg, num_clusters, documents):
+    closest_indices = []
+
+    for i in range(num_clusters):
+        distances = np.linalg.norm(vectors - alg.cluster_centers_[i], axis=1)
+
+        closest_index = np.argmin(distances)
+        closest_indices.append(closest_index)
+
+    selected_indices = sorted(closest_indices)
+    selected_docs = [documents[doc] for doc in selected_indices]
+    return selected_docs
+```
+
+The centroid chunks will be used as the "average" chunk for each cluster, hopefully giving us a solid idea of what the entire cluster is talking about.
+
+Now that we have the chunks, let's do some good old map reduction on them:
+
+```{python}
+from langchain import PromptTemplate
+from langchain.chains.summarize import load_summarize_chain
+
+llm4 = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4-turbo")
+
+map_prompt = """
+You will be given a piece of a larger text. This piece of text will be enclosed in triple backticks (```).
+Your job is to give a summary of this piece of text so that the reader will have a full understanding of what the text is about.
+Your response should be at least three paragraphs and fully encompass what was written in the piece of text.
+
+```{text}```
+
+FULL SUMMARY:
+"""
+
+map_prompt_template = PromptTemplate(template=map_prompt, input_variables=["text"])
+
+map_chain = load_summarize_chain(llm=llm, chain_type="stuff", prompt=map_prompt_template)
+```
+
+We once again start with the tender competition:
+
+```{python}
+summary_list = []
+
+selected_tender_docs = get_key_chunks(tender_vectors, tender_kmeans, tender_num_clusters, split_tender_competition)
+
+for i, doc in enumerate(selected_tender_docs):
+    chunk_summary = map_chain.run([doc])
+    summary_list.append(chunk_summary)
+
+    print(f'Summary #{i} - Preview: {chunk_summary[:250]} \n')
+
+tender_summaries = "\n".join(summary_list)
+
+tender_summaries = Document(page_content=tender_summaries)
+
+print(f'All your summaries together are {llm.get_num_tokens(tender_summaries.page_content)} tokens')
+```
+
+And then, finally, we combine the summaries.
+
+```{python}
+combine_prompt = """
+You will now be given a series of summaries from a larger text. The summaries will be enclosed in triple backticks(```).
+Your goal is to give a summary of what happened in the greater piece of text.
+The reader should be able to grasp what the full text is about from your summary.
+
+```{text}```
+SUMMARY:
+"""
+
+combine_prompt_template = PromptTemplate(template=combine_prompt, input_variables=["text"])
+
+reduce_chain = load_summarize_chain(llm=llm4, chain_type="stuff", prompt=combine_prompt_template)
+```
+
+```{python}
+import textwrap
+tender_output = reduce_chain.run([tender_summaries])
+textwrap.wrap(text=tender_output, width=75, replace_whitespace=False)
+```
+
+Lastly, let's repeat that process for Pride and Prejudice:
+
+```{python}
+# | code-fold: true
+summary_list = []
+
+selected_book_docs = get_key_chunks(book_vectors, book_kmeans, book_num_clusters, split_book)
+
+for i, doc in enumerate(selected_book_docs):
+    chunk_summary = map_chain.run([doc])
+    summary_list.append(chunk_summary)
+
+    print(f'Summary #{i} - Preview: {chunk_summary[:250]} \n')
+
+book_summaries = "\n".join(summary_list)
+
+book_summaries = Document(page_content=book_summaries)
+
+print(f'All your summaries together are {llm.get_num_tokens(book_summaries.page_content)} tokens')
+```
+
+```{python}
+# | code-fold: true
+book_output = reduce_chain.run([book_summaries])
+textwrap.wrap(text=book_output, width=75, replace_whitespace=False)
+```
+
+And that's it!

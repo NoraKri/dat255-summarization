@@ -192,11 +192,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Some simple ways to avoid using all the chunks for summarization is either randomly selecting chunks, or spacing out which chunks are selected. But what if we miss out on an important part of the text while doing this?</p>
 <p>A solution is K-means clustering, where each chunk is embedded, and then clusters are formed based on semantic meaning of those chunks. Then a summary is formed from each cluster, hopefully netting us a more accurate summary of huge texts.</p>
 <p>Another advantage is the amount of requests sent to the API. While Map Reduction sends many requests, clustering will send only one request, saving a lot of money.</p>
-<section id="implementing-kmeans-clustering" class="level3">
-<h3 class="anchored" data-anchor-id="implementing-kmeans-clustering">Implementing KMeans Clustering</h3>
+<section id="loading-our-documents" class="level3">
+<h3 class="anchored" data-anchor-id="loading-our-documents">Loading our documents</h3>
 <p>Let’s implement this method to summarize many documents or whole books!</p>
 <p>First, we need to import some packages and load in our OpenAI API key, since we will be using OpenAI’s GPT models.</p>
-<div id="d2b37ee7" class="cell" data-execution_count="1">
+<div id="4e66fb23" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
@@ -208,18 +208,437 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>OPENAI_API_KEY <span class="op">=</span> os.getenv(<span class="st">'OPENAI_API_KEY'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Next, we will load in our documents. Let’s load in a whole tender competition.</p>
-<div id="1a466118" class="cell" data-execution_count="2">
+<p>Next, we will load in our documents. Let’s load in a whole tender competition and a whole book (Pride and Prejudice).</p>
+<div id="1d08adee" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>anbudskonkurranse <span class="op">=</span> read_files(Path(<span class="st">'./content/nord-universitet'</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>anbudskonkurranse_filnavn <span class="op">=</span> [doc.metadata[<span class="st">"source"</span>] <span class="cf">for</span> doc <span class="kw">in</span> anbudskonkurranse]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Tender competition documents:</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> konk <span class="kw">in</span> anbudskonkurranse_filnavn:</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(konk)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>books <span class="op">=</span> read_files(Path(<span class="st">"./content/books/"</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>pride_and_prejudice <span class="op">=</span> books[<span class="dv">0</span>]</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Book:</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pride_and_prejudice.metadata[<span class="st">"source"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Tender competition documents:
+
+content/nord-universitet/Vedlegg_4_Profilhandbok-Nord-universitet.pdf
+content/nord-universitet/Vedlegg_5.B_databehandleravtale_bilag_2020.docx
+content/nord-universitet/Vedlegg_3_CMS-anbefaling-Leveranse-Nord-universitet.pdf
+content/nord-universitet/Vedlegg_2_Analyse-og-evaluering-Leveranse-Nord-universitet.pdf
+content/nord-universitet/ssa-v_bilag_2018_bok (1).docx
+content/nord-universitet/ssa-v_generell_avtaletekst_2018_bok (2).docx
+content/nord-universitet/ssa-t-bilag-2.docx
+content/nord-universitet/Vedlegg_1_FS-integrasjon.pdf
+content/nord-universitet/Vedlegg_5.A_dba_generell_avtaletekst_2020_no.docx
+content/nord-universitet/Vedlegg_6_Retningslinjer-for-www-nord-no-vedtatt-februar-2021.pdf
+content/nord-universitet/ssa-t_generell-avtaletekst-2018-bok.docx
+content/nord-universitet/ssa-v-bilag-2.docx
+content/nord-universitet/ssa-t_bilag_2018_bok.docx
+content/nord-universitet/Vedlegg_7_Prisskjema.xlsx
+content/nord-universitet/KONKURRANSEGRUNNLAG.docx
+
+Book:
+
+content/books/pride_and_prejudice.pdf</code></pre>
+</div>
+</div>
+<p>Let’s see how many tokens are in our documents!</p>
+<div id="da550b39" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>documents <span class="op">=</span> read_files(Path(<span class="st">'./content/nord-universitet'</span>))</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>doc <span class="op">=</span> documents[<span class="dv">1</span>]</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(document.metadata <span class="cf">for</span> document <span class="kw">in</span> documents)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_openai <span class="im">import</span> ChatOpenAI</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.schema <span class="im">import</span> Document</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>llm <span class="op">=</span> ChatOpenAI(openai_api_key<span class="op">=</span>OPENAI_API_KEY, model<span class="op">=</span><span class="st">"gpt-3.5-turbo"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>tender_content <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> doc <span class="kw">in</span> anbudskonkurranse:</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    tender_content <span class="op">+=</span> doc.page_content</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>tender_documents <span class="op">=</span> Document(page_content<span class="op">=</span>tender_content)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>num_tokens_tender <span class="op">=</span> llm.get_num_tokens(tender_documents.page_content)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Number of tokens in tender competition documents: </span><span class="sc">{</span>num_tokens_tender<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>num_tokens_book <span class="op">=</span> llm.get_num_tokens(pride_and_prejudice.page_content)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Number of tokens in book: </span><span class="sc">{</span>num_tokens_book<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;generator object &lt;genexpr&gt; at 0x3101d5ff0&gt;</code></pre>
+<pre><code>Number of tokens in tender competition documents: 137133
+Number of tokens in book: 160831</code></pre>
 </div>
 </div>
+<p>That’s a lot of tokens. If we were to use map reduction, sending all these tokens to the LLM would be pretty expensive. If we were using document stuffing, we might not be able to fit the document(s) at all!</p>
+</section>
+<section id="chunking-our-documents" class="level3">
+<h3 class="anchored" data-anchor-id="chunking-our-documents">Chunking our documents</h3>
+<p>To better facilitate clustering, let’s split our documents into more manageable sizes, called chunks. There are many different ways to chunk a document, the easiest being to split on specific characters, like punctuation marks. Another method is to chunk on token count, this can be nice because you know how many tokens you’re sending to the LLM with each chunk.</p>
+<p>Let’s try with token chunking.</p>
+<div id="dadc2ed9" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>split_tender_competition <span class="op">=</span> split_document_by_tokens(anbudskonkurranse, chunk_size<span class="op">=</span><span class="dv">2000</span>, overlap<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>split_book <span class="op">=</span> split_document_by_tokens([pride_and_prejudice], chunk_size<span class="op">=</span><span class="dv">2000</span>, overlap<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Now our tender competition is split up into </span><span class="sc">{</span><span class="bu">len</span>(split_tender_competition)<span class="sc">}</span><span class="ss"> documents"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"And our book is split up into </span><span class="sc">{</span><span class="bu">len</span>(split_book)<span class="sc">}</span><span class="ss"> documents"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Now our tender competition is split up into 98 documents
+And our book is split up into 92 documents</code></pre>
+</div>
+</div>
+</section>
+<section id="embedding" class="level3">
+<h3 class="anchored" data-anchor-id="embedding">Embedding</h3>
+<p>Clustering relies on embeddings to work. Embeddings are vector representations of text, so that LLMs can work with them (LLMs don’t understand human readable text, they understand numbers). Similar pieces of text will be closer together in the vector space, therefore the hope is that we can “cluster” pieces of text with similar meaning together, because they are closer together in the vector space.</p>
+<div id="ac2dfbb6" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_openai <span class="im">import</span> OpenAIEmbeddings</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> OpenAIEmbeddings(openai_api_key<span class="op">=</span>OPENAI_API_KEY, model<span class="op">=</span><span class="st">"text-embedding-3-small"</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>tender_vectors <span class="op">=</span> embeddings.embed_documents([doc.page_content <span class="cf">for</span> doc <span class="kw">in</span> split_tender_competition])</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>book_vectors <span class="op">=</span> embeddings.embed_documents([doc.page_content <span class="cf">for</span> doc <span class="kw">in</span> split_book])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="8b5290ec" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> TSNE</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_clusters(vectors, title, algo <span class="op">=</span> <span class="va">None</span>, ):</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    tsne <span class="op">=</span> TSNE(n_components<span class="op">=</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    vectors <span class="op">=</span> np.array(vectors)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    reduced_data_tsne <span class="op">=</span> tsne.fit_transform(vectors)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> algo:</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        plt.scatter(reduced_data_tsne[:, <span class="dv">0</span>], reduced_data_tsne[:, <span class="dv">1</span>], c<span class="op">=</span>algo.labels_)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        plt.scatter(reduced_data_tsne[:, <span class="dv">0</span>], reduced_data_tsne[:, <span class="dv">1</span>])</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'Dimension 1'</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Dimension 2'</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Cluster visualization for </span><span class="sc">{</span>title<span class="sc">}</span><span class="ss">.'</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Let’s try to visualize how our chunks look in the vector space. Please note that the embedding vectors have 1536 dimensions, and here we have squished them down to two dimension, so a lot of information will be lost. Perhaps some clustering of chunks would be easier to see with more dimensions.</p>
+<div id="e22d68b4" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plot_clusters(vectors<span class="op">=</span>book_vectors, title<span class="op">=</span><span class="st">"Pride and Prejudice"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>plot_clusters(vectors<span class="op">=</span>tender_vectors, title<span class="op">=</span><span class="st">"the tender competition"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="clustering_files/figure-html/cell-8-output-1.png" width="587" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="clustering_files/figure-html/cell-8-output-2.png" width="587" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="clustering" class="level3">
+<h3 class="anchored" data-anchor-id="clustering">Clustering</h3>
+<p>K-means clustering is an algorithm which starts by randomly initializing the centroids of a given amount of clusters (k). A centroid is one datapoint in the center of a cluster. It then iterates through two main steps: assignment and update.</p>
+<p>In the assignment step, each data point is assigned to the closest centroid based on a distance metric, typically Euclidean distance. In the update step, the centroids are recalculated as the mean of all data points assigned to each cluster.</p>
+<p>This process repeats until the centroids no longer move significantly, indicating convergence. The result is a grouping of data points such that points in the same cluster are more similar to each other than to those in other clusters, based on the chosen distance metric.</p>
+<p>Note that K-means takes the amount of clusters as a parameter. For now, we’ll set it manually.</p>
+<div id="f65e098e" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>num_clusters <span class="op">=</span> <span class="dv">11</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>tender_kmeans <span class="op">=</span> KMeans(n_clusters<span class="op">=</span>num_clusters, random_state<span class="op">=</span><span class="dv">42</span>).fit(tender_vectors)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>book_kmeans <span class="op">=</span> KMeans(n_clusters<span class="op">=</span>num_clusters, random_state<span class="op">=</span><span class="dv">42</span>).fit(book_vectors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now let’s visualize our clusters:</p>
+<div id="a9e1a334" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>plot_clusters(vectors<span class="op">=</span>tender_vectors, algo<span class="op">=</span>tender_kmeans, title<span class="op">=</span><span class="st">"the tender competition with 11 clusters"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>plot_clusters(vectors<span class="op">=</span>book_vectors, algo<span class="op">=</span>book_kmeans, title<span class="op">=</span><span class="st">"Pride and Prejudice with 11 clusters"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="clustering_files/figure-html/cell-10-output-1.png" width="587" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="clustering_files/figure-html/cell-10-output-2.png" width="587" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This looks alright, especially the tender competition has some clear clusters. However, how can we know that we have chosen the correct amount of clusters for our K-means algorithm?</p>
+</section>
+<section id="silhouette-scoring" class="level3">
+<h3 class="anchored" data-anchor-id="silhouette-scoring">Silhouette scoring</h3>
+<p>Silhouette scoring is a method used to assess the quality of clusters when using for example K-means. The silhouette score for each data point is calculated based on two factors: - The average distance between the data point and all other points in the same cluster (cohesion) - The average distance between the data point and all points in the nearest cluster to which the data point does not belong (separation).</p>
+<p>We find the silhouette score for one data point by taking the difference between these two distances, normalized by the maximum of the two. This score ranges from -1 to 1, where a score close to 1 indicates that the data point clearly belongs to its own cluster, a score near 0 indicates that the point is on the border of two clusters, and a score near -1 suggests that the point may have been assigned to the wrong cluster. The overall silhouette score of the clustering is the average of the silhouette scores of all the data points.</p>
+<p>So what we can do is try many different values of k and find the silhouette score for each one, then choose the best scoring k as our cluster amount, where the score closest to 1 is best.</p>
+<div id="35768891" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> silhouette_score</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_optimal_clusters(vectors, max_k):</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    score <span class="op">=</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    best_n_clusters <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>, max_k):</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        kmeans <span class="op">=</span> KMeans(n_clusters<span class="op">=</span>k, random_state<span class="op">=</span><span class="dv">1</span>).fit_predict(vectors)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        new_score <span class="op">=</span> silhouette_score(vectors, kmeans)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> new_score <span class="op">&gt;</span> score:</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>            best_n_clusters <span class="op">=</span> k</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>            score <span class="op">=</span> new_score</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"For n_clusters = </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">, silhouette score is </span><span class="sc">{</span>new_score<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Best number of clusters is </span><span class="sc">{</span>best_n_clusters<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best_n_clusters</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s find the optimal number of cluster for our tender competition:</p>
+<div id="3aae19dc" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tender_num_clusters <span class="op">=</span> find_optimal_clusters(tender_vectors, max_k<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>tender_kmeans <span class="op">=</span> KMeans(n_clusters<span class="op">=</span>tender_num_clusters, random_state<span class="op">=</span><span class="dv">1</span>).fit(tender_vectors)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>plot_clusters(vectors<span class="op">=</span>tender_vectors, algo<span class="op">=</span>tender_kmeans, title<span class="op">=</span><span class="ss">f"our tender competition with </span><span class="sc">{</span>tender_num_clusters<span class="sc">}</span><span class="ss"> clusters"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>For n_clusters = 3, silhouette score is 0.16319734949495834)
+For n_clusters = 4, silhouette score is 0.13677655311745174)
+For n_clusters = 5, silhouette score is 0.13867432915900288)
+For n_clusters = 6, silhouette score is 0.11354961404064279)
+For n_clusters = 7, silhouette score is 0.10669988485818448)
+For n_clusters = 8, silhouette score is 0.10039881578450706)
+For n_clusters = 9, silhouette score is 0.0775684824083643)
+For n_clusters = 10, silhouette score is 0.07354397576934713)
+For n_clusters = 11, silhouette score is 0.0896860457734401)
+For n_clusters = 12, silhouette score is 0.09227585159583783)
+For n_clusters = 13, silhouette score is 0.09388758282715984)
+For n_clusters = 14, silhouette score is 0.09267778721302193)
+For n_clusters = 15, silhouette score is 0.09460706544627888)
+For n_clusters = 16, silhouette score is 0.0869772390044283)
+For n_clusters = 17, silhouette score is 0.09299719039273895)
+For n_clusters = 18, silhouette score is 0.10369596708641589)
+For n_clusters = 19, silhouette score is 0.10545737216311063)
+Best number of clusters is 3</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="clustering_files/figure-html/cell-12-output-2.png" width="587" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>And then for our book:</p>
+<div id="7cc93c4f" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>book_num_clusters <span class="op">=</span> find_optimal_clusters(book_vectors, max_k<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>book_kmeans <span class="op">=</span> KMeans(n_clusters<span class="op">=</span>book_num_clusters, random_state<span class="op">=</span><span class="dv">1</span>).fit(book_vectors)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>plot_clusters(vectors<span class="op">=</span>book_vectors, algo<span class="op">=</span>book_kmeans, title<span class="op">=</span><span class="ss">f"Pride and Prejudice with </span><span class="sc">{</span>book_num_clusters<span class="sc">}</span><span class="ss"> clusters"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>For n_clusters = 3, silhouette score is 0.047733092427202854)
+For n_clusters = 4, silhouette score is 0.051067859191365084)
+For n_clusters = 5, silhouette score is 0.05523242135225988)
+For n_clusters = 6, silhouette score is 0.0465462151274959)
+For n_clusters = 7, silhouette score is 0.030455545138270337)
+For n_clusters = 8, silhouette score is 0.03968968584609667)
+For n_clusters = 9, silhouette score is 0.03900376290198097)
+For n_clusters = 10, silhouette score is 0.0393203646925307)
+For n_clusters = 11, silhouette score is 0.041871536535647465)
+For n_clusters = 12, silhouette score is 0.04602273803755732)
+For n_clusters = 13, silhouette score is 0.04664794070136)
+For n_clusters = 14, silhouette score is 0.04450307354685479)
+For n_clusters = 15, silhouette score is 0.037468937738576666)
+For n_clusters = 16, silhouette score is 0.036899065375207624)
+For n_clusters = 17, silhouette score is 0.04084609100393472)
+For n_clusters = 18, silhouette score is 0.04017819773375103)
+For n_clusters = 19, silhouette score is 0.039037963267425264)
+Best number of clusters is 5</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="clustering_files/figure-html/cell-13-output-2.png" width="587" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="summarization-using-k-means" class="level3">
+<h3 class="anchored" data-anchor-id="summarization-using-k-means">Summarization using K-means</h3>
+<p>Now for the final piece of the puzzle. We have the clusters, now what? Let’s find the chunk which sits closest to the center of each cluster.</p>
+<div id="31b92e07" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_key_chunks(vectors, alg, num_clusters, documents):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    closest_indices <span class="op">=</span> []</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(num_clusters):</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        distances <span class="op">=</span> np.linalg.norm(vectors <span class="op">-</span> alg.cluster_centers_[i], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        closest_index <span class="op">=</span> np.argmin(distances)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        closest_indices.append(closest_index)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    selected_indices <span class="op">=</span> <span class="bu">sorted</span>(closest_indices)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    selected_docs <span class="op">=</span> [documents[doc] <span class="cf">for</span> doc <span class="kw">in</span> selected_indices]</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> selected_docs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The centroid chunks will be used as the “average” chunk for each cluster, hopefully giving us a solid idea of what the entire cluster is talking about.</p>
+<p>Now that we have the chunks, let’s do some good old map reduction on them:</p>
+<div id="ede73619" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain <span class="im">import</span> PromptTemplate</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.chains.summarize <span class="im">import</span> load_summarize_chain</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>llm4 <span class="op">=</span> ChatOpenAI(openai_api_key<span class="op">=</span>OPENAI_API_KEY, model<span class="op">=</span><span class="st">"gpt-4-turbo"</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>map_prompt <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="st">You will be given a piece of a larger text. This piece of text will be enclosed in triple backticks (```).</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="st">Your job is to give a summary of this piece of text so that the reader will have a full understanding of what the text is about.</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="st">Your response should be at least three paragraphs and fully encompass what was written in the piece of text.</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="st">```</span><span class="sc">{text}</span><span class="st">```</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="st">FULL SUMMARY:</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>map_prompt_template <span class="op">=</span> PromptTemplate(template<span class="op">=</span>map_prompt, input_variables<span class="op">=</span>[<span class="st">"text"</span>])</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>map_chain <span class="op">=</span> load_summarize_chain(llm<span class="op">=</span>llm, chain_type<span class="op">=</span><span class="st">"stuff"</span>, prompt<span class="op">=</span>map_prompt_template)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We once again start with the tender competition:</p>
+<div id="6c683572" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>summary_list <span class="op">=</span> []</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>selected_tender_docs <span class="op">=</span> get_key_chunks(tender_vectors, tender_kmeans, tender_num_clusters, split_tender_competition)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, doc <span class="kw">in</span> <span class="bu">enumerate</span>(selected_tender_docs):</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    chunk_summary <span class="op">=</span> map_chain.run([doc])</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    summary_list.append(chunk_summary)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'Summary #</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss"> - Preview: </span><span class="sc">{</span>chunk_summary[:<span class="dv">250</span>]<span class="sc">}</span><span class="ss"> </span><span class="ch">\n</span><span class="ss">'</span>)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>tender_summaries <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(summary_list)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>tender_summaries <span class="op">=</span> Document(page_content<span class="op">=</span>tender_summaries)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'All your summaries together are </span><span class="sc">{</span>llm<span class="sc">.</span>get_num_tokens(tender_summaries.page_content)<span class="sc">}</span><span class="ss"> tokens'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Summary #0 - Preview: The text discusses the need for the university's website to be more visually appealing and user-friendly while still maintaining a sense of creativity. It emphasizes the importance of standing out among other universities by daring to have a clear pe 
+
+Summary #1 - Preview: The piece of text provided outlines various important clauses and terms within a contractual agreement. It emphasizes the importance of confidentiality, stating that both parties must maintain confidentiality even after the agreement has ended. Emplo 
+
+Summary #2 - Preview: The piece of text provided outlines the requirements for a Content Management System (CMS) solution for Nord University. It emphasizes the importance of having a solution that can efficiently manage broken links, redirects, user-friendly interfaces,  
+
+All your summaries together are 801 tokens</code></pre>
+</div>
+</div>
+<p>And then, finally, we combine the summaries.</p>
+<div id="cef54639" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>combine_prompt <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="st">You will now be given a series of summaries from a larger text. The summaries will be enclosed in triple backticks(```).</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="st">Your goal is to give a summary of what happened in the greater piece of text.</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="st">The reader should be able to grasp what the full text is about from your summary.</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="st">```</span><span class="sc">{text}</span><span class="st">```</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="st">SUMMARY:</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>combine_prompt_template <span class="op">=</span> PromptTemplate(template<span class="op">=</span>combine_prompt, input_variables<span class="op">=</span>[<span class="st">"text"</span>])</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>reduce_chain <span class="op">=</span> load_summarize_chain(llm<span class="op">=</span>llm4, chain_type<span class="op">=</span><span class="st">"stuff"</span>, prompt<span class="op">=</span>combine_prompt_template)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="0752073b" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> textwrap</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>tender_output <span class="op">=</span> reduce_chain.run([tender_summaries])</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>textwrap.wrap(text<span class="op">=</span>tender_output, width<span class="op">=</span><span class="dv">100</span>, replace_whitespace<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="34">
+<pre><code>["The larger text primarily discusses the enhancement and management of Nord University's digital",
+ 'presence, focusing on three key areas: website design and user experience, contractual obligations',
+ 'and terms for services, and specifications for a Content Management System (CMS). \n\nFirstly, the',
+ "text outlines the importance of redesigning the university's website to be more visually appealing,",
+ "user-friendly, and accessible, while emphasizing the institution's unique qualities and research",
+ 'activities. It suggests improvements such as simplifying language, using engaging content, and',
+ 'ensuring universal design to attract potential students and researchers.\n\nSecondly, the text delves',
+ 'into detailed contractual terms and conditions between parties, stressing the significance of',
+ 'confidentiality, compensation specifics, payment terms, legal compliance, and security measures.',
+ 'This section provides a comprehensive overview of the expectations and responsibilities to ensure',
+ 'smooth contractual relationships.\n\nLastly, the text specifies requirements for a CMS solution',
+ 'tailored for Nord University. It emphasizes functionalities like managing broken links, user',
+ 'authentication, profile management, workflow processes, and document accessibility to enhance',
+ "content management and user experience on the university's digital platforms.\n\nOverall, the text",
+ "serves as a guide to improving and managing various aspects of Nord University's digital strategy to",
+ 'better serve its community and stakeholders.']</code></pre>
+</div>
+</div>
+<p>Lastly, let’s repeat that process for Pride and Prejudice:</p>
+<div id="b41b40b2" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>summary_list <span class="op">=</span> []</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>selected_book_docs <span class="op">=</span> get_key_chunks(book_vectors, book_kmeans, book_num_clusters, split_book)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, doc <span class="kw">in</span> <span class="bu">enumerate</span>(selected_book_docs):</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    chunk_summary <span class="op">=</span> map_chain.run([doc])</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    summary_list.append(chunk_summary)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'Summary #</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss"> - Preview: </span><span class="sc">{</span>chunk_summary[:<span class="dv">250</span>]<span class="sc">}</span><span class="ss"> </span><span class="ch">\n</span><span class="ss">'</span>)</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>book_summaries <span class="op">=</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(summary_list)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>book_summaries <span class="op">=</span> Document(page_content<span class="op">=</span>book_summaries)</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'All your summaries together are </span><span class="sc">{</span>llm<span class="sc">.</span>get_num_tokens(book_summaries.page_content)<span class="sc">}</span><span class="ss"> tokens'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Summary #0 - Preview: The piece of text revolves around a discussion between Elizabeth and another character (likely Jane) regarding Mr. Bingley's behavior and relationships. Elizabeth expresses her belief that Mr. Bingley's actions are not driven by design but rather by  
+
+Summary #1 - Preview: In this piece of text, the characters Elizabeth, Mrs. Gardiner, and others are discussing Mr. Darcy's behavior and character. Mrs. Gardiner expresses surprise at Darcy's treatment of Mr. Wickham, noting his pleasant appearance but questioning his act 
+
+Summary #2 - Preview: The enclosed text depicts a conversation between Elizabeth and her family regarding the elopement of Lydia with Wickham. Elizabeth expresses concerns about Lydia's lack of moral values and upbringing, attributing her actions to her youth, frivolous l 
+
+Summary #3 - Preview: In this piece of text, we see Elizabeth Bennet feeling disappointed and hurt by Mr. Darcy's behavior when they meet again after some time. Despite her attempts to engage him in conversation, Mr. Darcy remains silent and distant, causing Elizabeth to  
+
+Summary #4 - Preview: In this piece of text, we see a scene where Jane Bennet's engagement to Mr. Bingley is announced and celebrated by her family. Mrs. Bennet is ecstatic and expresses her happiness at the match, believing Jane to be the luckiest and most beautiful of h 
+
+All your summaries together are 1593 tokens</code></pre>
+</div>
+</div>
+<div id="b4c50f82" class="cell" data-execution_count="19">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>book_output <span class="op">=</span> reduce_chain.run([book_summaries])</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>textwrap.wrap(text<span class="op">=</span>book_output, width<span class="op">=</span><span class="dv">100</span>, replace_whitespace<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="36">
+<pre><code>['The overarching narrative encapsulated in the text pieces revolves around the intricate social',
+ 'dynamics and emotional developments primarily within the Bennet family from Jane Austen\'s "Pride and',
+ 'Prejudice." The story threads highlight delicate conversations and evolving relationships influenced',
+ 'by societal norms, romantic entanglements, and personal values.\n\nCentral to the narrative is',
+ 'Elizabeth Bennet, whose astute observations and interactions with characters like Mr. Bingley, Mr.',
+ 'Darcy, and her own family members drive much of the plot. Discussions often revolve around the',
+ "complexities of relationships, such as Mr. Bingley's fluctuating attentions and Mr. Darcy's",
+ 'seemingly aloof but complex disposition, which Elizabeth tries to decipher. Key events, such as Mr.',
+ "Bingley's behavior towards Jane Bennet, Lydia Bennet's reckless elopement with Mr. Wickham, and the",
+ 'unexpected visit from Lady Catherine de Bourgh, catalyze shifts in these relationships and societal',
+ "perceptions.\n\nThe narrative captures the tension and excitement surrounding Jane Bennet's engagement",
+ "to Mr. Bingley, juxtaposed with Elizabeth's personal turmoil in understanding her feelings towards",
+ 'Mr. Darcy amidst societal and familial expectations. The text also explores themes of morality,',
+ 'reputation, and personal growth as characters navigate the challenges posed by their desires,',
+ 'obligations, and the prevailing social etiquette.\n\nOverall, the text pieces collectively portray the',
+ 'emotional landscape and social intricacies of early 19th-century England through the lens of the',
+ "Bennet family's experiences, focusing on romance, social status, and personal integrity."]</code></pre>
+</div>
+</div>
+<p>And that’s it!</p>
 
 
 </section>
