@@ -12,6 +12,27 @@ Some simple ways to avoid using all the chunks for summarization is either rando
 A solution is K-means clustering, where each chunk is embedded, and then clusters are formed based on semantic meaning of those chunks. Then a summary is formed from each cluster, hopefully netting us a more accurate summary of huge texts.
 
 Another advantage is the amount of requests sent to the API. While Map Reduction sends many requests, clustering will send only one request, saving a lot of money.
-py
+
+### Implementing KMeans Clustering
+Let's implement this method to summarize many documents or whole books!
+
+First, we need to import some packages and load in our OpenAI API key, since we will be using OpenAI's GPT models.
 ```{python}
+# | code-fold: true
+from dotenv import load_dotenv
+from utils import read_files, split_document_by_tokens
+from pathlib import Path
+import os
+
+load_dotenv()
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+```
+
+Next, we will load in our documents. Let's load in a whole tender competition.
+```{python}
+# | code-fold: true
+documents = read_files(Path('./content/nord-universitet'))
+doc = documents[1]
+docnames = doc.metadata["source"] for doc in documents
+print(doc.metadata["source"])
 ```
