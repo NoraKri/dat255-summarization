@@ -188,7 +188,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The simplest form of summarization, where you simply “stuff” the document into your prompt. Works well for small amounts of text that fit into the model’s context window.</p>
 <p>Some newer models have huge context windows of 200k+ tokens, but one should still be careful about stuffing huge documents like books straight into the model for summarization. The reason for this is that commercial models charge for the tokens used, so stuffing will become expensive as the text length grows. In addition, most models have an output token limit of a bit over 4 thousand tokens, limiting how much text we can get out.</p>
 <p>To get us started, let’s load in some documents and fetch our OpenAI API key.</p>
-<div id="490fb96d" class="cell" data-execution_count="1">
+<div id="d628f9b6" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> utils <span class="im">import</span> read_files</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
@@ -200,7 +200,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>documents <span class="op">=</span> read_files(Path(<span class="st">'./content/nord-universitet'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We need a prompt for summarizing our stuffed document. Our prompt will have a variable, context, which contains our document.</p>
-<div id="da1fbcea" class="cell" data-execution_count="2">
+<div id="e842dcff" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>stuff_prompt <span class="op">=</span> <span class="st">"""Write a concise summary of the following text enclosed in triple backticks (```).</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="st">It is important that your response is in the same language as the text:</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -211,7 +211,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>LangChain’s Prompt Templates make it super easy to insert variables into our prompts. We simply write out our prompt, with a variable where we would like our document to go, and then define a PromptTemplate which specifies that variable as an input variable to our prompt.</p>
 <p>Let’s try stuffing a whole tender competition with 15 files directly into OpenAI’s GPT 3.5 Turbo model!</p>
-<div id="9bd7bcd3" class="cell" data-execution_count="3">
+<div id="e2d009eb" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.chains.combine_documents.stuff <span class="im">import</span> create_stuff_documents_chain</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.prompts <span class="im">import</span> PromptTemplate</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_openai <span class="im">import</span> ChatOpenAI</span>
@@ -229,26 +229,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> chain.invoke({<span class="st">"context"</span>: documents})</span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> RateLimitError <span class="im">as</span> e:</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    textwrap.wrap(e.message, drop_whitespace<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(e)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Error code: 429 - {'error': {'message': 'Request too large for gpt-3.5-turbo in organization org-QszCmPHnBJ7wwGx6aJTDzZmp on tokens per min (TPM): Limit 60000, Requested 107761. The input or output tokens must be reduced in order to run successfully. Visit https://platform.openai.com/account/rate-limits to learn more.', 'type': 'tokens', 'param': None, 'code': 'rate_limit_exceeded'}}</code></pre>
+</div>
 </div>
 <p>Whoops, that didn’t go so well. Seems we exceeded the token limit of our model. We’ll explore how to remedy this in later posts, but for now, let’s just stuff the first document instead.</p>
-<div id="fbe6c3ad" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> [documents[<span class="dv">0</span>]]</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>textwrap.wrap(text<span class="op">=</span>chain.invoke({<span class="st">"context"</span>: docs}), drop_whitespace<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="26">
-<pre><code>['Dette er et konkurransegrunnlag for anskaffelse av nye nettsider og ',
- 'publiseringsløsning for Nord universitet. Formålet er å få en stabil, ',
- 'brukervennlig plattform som støtter universitetets behov. Anskaffelsen',
- ' omfatter utvikling, implementering, opplæring, drift og vedlikehold ',
- 'av løsningen. Anslått verdi er 12 MNOK. Konkurransen gjennomføres iht.',
- ' offentlige anskaffelseslover, med begrensning i antall deltakere og ',
- 'utvelgelseskriterier basert på kvalifikasjoner. Konkurransegrunnlaget ',
- 'består av to deler med vedlegg som beskriver detaljer om oppdraget. ',
- 'Leverandører må oppfylle registreringskrav, økonomiske, tekniske og ',
- 'faglige kvalifikasjoner. Tildeling skjer basert på kvalitet, ',
- 'kompetanse, prosjektfremdrift, service og vedlikehold, og pris.```']</code></pre>
+<div id="245c6abf" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> [documents[<span class="dv">0</span>]]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>textwrap.wrap(text<span class="op">=</span>chain.invoke({<span class="st">"context"</span>: docs}), drop_whitespace<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>['This text is a competition announcement for the procurement of new ',
+ 'websites and a publishing solution (CMS) for Nord University. The ',
+ 'purpose is to engage a supplier to assist with the development, ',
+ 'design, and implementation of a new publishing solution for the ',
+ 'external website www.nord.no, including maintenance and operation. The',
+ ' estimated value of the procurement is between 3 and 4 MNOK excluding ',
+ 'VAT. The competition will be limited to between five and seven ',
+ 'suppliers. The text outlines the requirements, procedures, and ',
+ 'evaluation criteria for the competition. The communication and ',
+ 'documentation related to the competition must be in Norwegian. The ',
+ 'text also provides information on deadlines, contract terms, ',
+ 'confidentiality, and the evaluation process.']</code></pre>
 </div>
 </div>
+<p>As we can see, stuffing works perfectly well for summarizing text that fits in the model’s context window.</p>
 
 
 
