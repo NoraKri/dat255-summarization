@@ -16,5 +16,8 @@
   },
   "about.qmd": {
     "about.html": "9577725b"
+  },
+  "posts/document-stuffing/stuffing.qmd": {
+    "stuffing.html": "fc6d11b7"
   }
 }

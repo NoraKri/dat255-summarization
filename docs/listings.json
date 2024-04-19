@@ -3,9 +3,10 @@
     "listing": "/index.html",
     "items": [
       "/posts/summarization/index.html",
+      "/posts/document-stuffing/stuffing.html",
+      "/posts/map-reduction/map-reduction.html",
       "/posts/kmeans-clustering/clustering.html",
-      "/posts/presentation/presentation.html",
-      "/posts/map-reduction/map-reduction.html"
+      "/posts/presentation/presentation.html"
     ]
   }
 ]

@@ -313,7 +313,7 @@ print(f'All your summaries together are {llm.get_num_tokens(book_summaries.page_
 ```{python}
 # | code-fold: true
 book_output = reduce_chain.run([book_summaries])
-textwrap.wrap(text=book_output, width=75, replace_whitespace=False)
+textwrap.wrap(text=book_output, replace_whitespace=False)
 ```
 
 And that's it!

@@ -1,2 +1,1 @@
-# dat255-blog
- 
+# DAT255 Summarization

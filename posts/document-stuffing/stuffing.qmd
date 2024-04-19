@@ -1,0 +1,73 @@
+---
+title: "Document Stuffing"
+author: "Nora Kristiansen, Torbjørn Vatnelid"
+date: "2024-04-15"
+jupyter: python3
+format:
+  html:
+    code-overflow: wrap
+---
+
+The simplest form of summarization, where you simply "stuff" the document into your prompt. Works well for small amounts of text that fit into the model's context window.
+
+Some newer models have huge context windows of 200k+ tokens, but one should still be careful about stuffing huge documents like books straight into the model for summarization. The reason for this is that commercial models charge for the tokens used, so stuffing will become expensive as the text length grows. In addition, most models have an output token limit of a bit over 4 thousand tokens, limiting how much text we can get out.
+
+To get us started, let's load in some documents and fetch our OpenAI API key.
+
+```{python}
+from dotenv import load_dotenv
+from utils import read_files
+from pathlib import Path
+
+import os
+
+load_dotenv()
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+documents = read_files(Path('./content/nord-universitet'))
+```
+
+We need a prompt for summarizing our stuffed document. Our prompt will have a variable, context, which contains our document.
+
+```{python}
+stuff_prompt = """Write a concise summary of the following text enclosed in triple backticks (```).
+It is important that your response is in the same language as the text:
+
+```{context}```
+
+SUMMARY:
+"""
+```
+
+LangChain's Prompt Templates make it super easy to insert variables into our prompts. We simply write out our prompt, with a variable where we would like our document to go, and then define a PromptTemplate which specifies that variable as an input variable to our prompt.
+
+Let's try stuffing a whole tender competition with 15 files directly into OpenAI's GPT 3.5 Turbo model! 
+
+```{python}
+from langchain.chains.combine_documents.stuff import create_stuff_documents_chain
+from langchain.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+from openai import RateLimitError
+import textwrap
+
+stuff_prompt_template = PromptTemplate(
+    template=stuff_prompt,
+    input_variables=["context"]
+)
+
+llm = ChatOpenAI(model_name="gpt-3.5-turbo", api_key=OPENAI_API_KEY)
+chain = create_stuff_documents_chain(llm=llm, prompt=stuff_prompt_template)
+
+try:
+    result = chain.invoke({"context": documents})
+except RateLimitError as e:
+    print(e)
+```
+
+Whoops, that didn't go so well. Seems we exceeded the token limit of our model. We'll explore how to remedy this in later posts, but for now, let's just stuff the first document instead.
+
+```{python}
+docs = [documents[0]]
+textwrap.wrap(text=chain.invoke({"context": docs}), drop_whitespace=False)
+```
+
+As we can see, stuffing works perfectly well for summarizing text that fits in the model's context window.

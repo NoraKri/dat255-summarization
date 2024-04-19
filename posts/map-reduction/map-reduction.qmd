@@ -1,11 +1,7 @@
 ---
 title: Map Reduction
 author: 'Nora Kristiansen, Torjørn Vatnelid'
-date: '2024-02-14'
-categories:
-  - code
-  - analysis
-  - llm
+date: '2024-04-14'
 jupyter: python3
 ---
 
